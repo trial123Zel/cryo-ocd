@@ -30,5 +30,8 @@ originates from an upstream contribution.
   the documentation summary (`book/SUMMARY.md`), and a block-chunk test
   (`blocks.rs`). Adopted from upstream PRs paradigmxyz/cryo#220 (@sunxunle),
   #226 (@Hopium21), and #237 (@solanaXpeter). (#12)
+- Fixed the `clippy::io_other_error` lint failure on Rust 1.95 by using
+  `std::io::Error::other` in `crates/freeze/build.rs`. Adopted from upstream PR
+  paradigmxyz/cryo#234 (@strmfos). (#14)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
