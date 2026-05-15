@@ -1,19 +1,19 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest a capability for cryo-ocd
 title: ""
-labels: feature-request
+labels: type/feat
 assignees: ""
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Problem**
+What problem would this feature solve?
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**Proposed solution**
+What you would like cryo-ocd to do.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Alternatives considered**
+Other approaches you have thought about.
 
 **Additional context**
-Add any other context or screenshots about the feature request here.
+Anything else — examples from other tools, references, etc.

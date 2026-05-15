@@ -1,28 +1,26 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report incorrect behavior in cryo-ocd
 title: ""
-labels: bug
+labels: type/bug
 assignees: ""
 ---
 
 **Version**
-List the versions of all `cryo` packages you are using.
-
+The cryo-ocd commit or version you are running.
 
 **Platform**
-The output of `uname -a` (UNIX), or version and 32 or 64-bit (Windows)
+Output of `uname -a` (UNIX), or OS version (Windows).
 
 **Description**
-Enter your issue details here.
-One way to structure the description:
+A clear summary of the bug.
 
-[short summary of the bug]
+**To reproduce**
+The exact command(s) used. Do **not** paste API keys, RPC URLs, or IP
+addresses — replace them with placeholders.
 
-I tried this code:
+**Expected behavior**
+What you expected to happen.
 
-[code sample that causes the bug]
-
-I expected to see this happen: [explanation]
-
-Instead, this happened: [explanation]
+**Actual behavior**
+What actually happened — error messages, wrong output, etc.

@@ -1,0 +1,48 @@
+name: Implementation Task
+description: A scoped task from the cryo-ocd roadmap.
+title: "P?-?: "
+labels: ["status/ready"]
+body:
+  - type: input
+    id: roadmap-id
+    attributes:
+      label: Roadmap task ID
+      description: The task ID from ROADMAP.md (e.g. P2-3, H-1).
+      placeholder: P2-3
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is wrong or missing, and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Affected files
+      description: Files or crates expected to change.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Concrete, checkable conditions for "done".
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation method
+      description: How the change will be proven correct (tests, cryo_test diff, etc.).
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References & credit
+      description: Upstream issue/PR numbers and original authors to credit.
+    validations:
+      required: false
