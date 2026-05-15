@@ -23,6 +23,8 @@ originates from an upstream contribution.
 - Self-hosted CI job for `cryo_test` data validation against a live node.
 - Refreshed issue and pull-request templates, including an implementation-task
   template.
+- `rust-toolchain.toml` pinning the Rust toolchain (1.95.0) so the `stable`
+  channel advancing cannot silently break CI. (#15)
 
 ### Fixed
 
@@ -33,5 +35,8 @@ originates from an upstream contribution.
 - Fixed the `clippy::io_other_error` lint failure on Rust 1.95 by using
   `std::io::Error::other` in `crates/freeze/build.rs`. Adopted from upstream PR
   paradigmxyz/cryo#234 (@strmfos). (#14)
+- Resolved all remaining `clippy` lints across the workspace under Rust 1.95
+  (`needless_return`, `useless_vec`, `len_zero`, `unnecessary_unwrap`,
+  `double_ended_iterator_last`). (#15)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
