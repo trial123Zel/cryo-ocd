@@ -1,6 +1,12 @@
-# ❄️🧊 cryo 🧊❄️
+# ❄️🧊 cryo-ocd 🧊❄️
 
-[![Rust](https://github.com/paradigmxyz/cryo/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/paradigmxyz/cryo/actions/workflows/build_and_test.yml) [![Telegram Chat](https://img.shields.io/badge/Telegram-join_chat-blue.svg)](https://t.me/paradigm_data)
+[![Rust](https://github.com/trial123Zel/cryo-ocd/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/trial123Zel/cryo-ocd/actions/workflows/build_and_test.yml)
+
+> **cryo-ocd** is a community-maintained fork of [`paradigmxyz/cryo`](https://github.com/paradigmxyz/cryo) — an excellent blockchain-data extraction tool that lost active maintenance after 2023. This fork methodically works through the upstream issue and pull-request backlog and modernizes the codebase, so the tool stays genuinely useful to data analysts.
+>
+> **cryo-ocd is not affiliated with, sponsored by, or endorsed by Paradigm.** All credit for the original software belongs to Paradigm and the upstream contributors — see [`ACKNOWLEDGEMENTS.md`](./ACKNOWLEDGEMENTS.md).
+>
+> Project direction lives in [`ROADMAP.md`](./ROADMAP.md), [`CHANGELOG.md`](./CHANGELOG.md), and the Architecture Decision Records in [`docs/adr/`](./docs/adr/). To contribute, start with [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 `cryo` is the easiest way to extract blockchain data to parquet, csv, json, or a python dataframe.
 

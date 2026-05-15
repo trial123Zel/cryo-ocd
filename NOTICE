@@ -1,0 +1,17 @@
+cryo-ocd
+========
+
+cryo-ocd is a community-maintained fork of cryo, originally created by
+Paradigm (https://github.com/paradigmxyz/cryo).
+
+The original cryo software is licensed under the Apache License, Version 2.0,
+and the MIT license, at the user's option. Those licenses, and the original
+copyright notices, are retained unchanged in LICENSE-APACHE and LICENSE-MIT.
+
+Modifications made in this fork are contributed by the cryo-ocd contributors
+under the same dual Apache-2.0 / MIT license. A summary of significant changes
+made within cryo-ocd is maintained in CHANGELOG.md.
+
+cryo-ocd is NOT affiliated with, sponsored by, or endorsed by Paradigm.
+
+Original authors and upstream contributors are credited in ACKNOWLEDGEMENTS.md.

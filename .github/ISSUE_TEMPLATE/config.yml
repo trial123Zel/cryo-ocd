@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: cryo-ocd Roadmap
+    url: https://github.com/trial123Zel/cryo-ocd/blob/main/ROADMAP.md
+    about: See the phased plan and task IDs before opening an implementation task.
+  - name: Upstream cryo
+    url: https://github.com/paradigmxyz/cryo
+    about: cryo-ocd is a fork. The original project and its issue tracker live here.

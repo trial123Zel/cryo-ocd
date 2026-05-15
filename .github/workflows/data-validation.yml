@@ -1,0 +1,48 @@
+name: Data Validation
+
+# cryo_test data-correctness validation against a live node.
+#
+# This job runs on a self-hosted runner on the maintainer's private network.
+# Because that runner can reach private infrastructure, it must never execute
+# for untrusted actors or fork pull requests. See:
+#   docs/adr/0004-validation-strategy.md
+#   docs/adr/0005-secret-handling.md
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  cryo-test:
+    name: cryo_test data diff
+    # Lockdown: run only for the maintainer's own branches in this repository.
+    if: >-
+      github.actor == 'trial123Zel' &&
+      (github.event_name == 'workflow_dispatch' ||
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check runner configuration
+        run: |
+          # RETH_RPC_URL is provided by the runner host (e.g. the runner's
+          # own .env), never stored on GitHub. See ADR-0004 / ADR-0005.
+          if [ -z "${RETH_RPC_URL:-}" ]; then
+            echo "::error::RETH_RPC_URL is not set on the self-hosted runner."
+            exit 1
+          fi
+          echo "runner configured (node endpoint intentionally not printed)"
+
+      - name: Build cryo (release)
+        run: cargo build --release --workspace
+
+      - name: cryo_test data validation
+        run: |
+          # Smoke check: confirm the freshly built cryo can reach the node.
+          ./target/release/cryo blocks -b 1000:1010 \
+            --rpc "$RETH_RPC_URL" \
+            --output-dir "$RUNNER_TEMP/cryo_ci" --overwrite
+          # TODO(P1-0): replace this smoke check with a full cryo_test diff
+          # against the golden baseline once the baseline is captured.

@@ -1,14 +1,30 @@
 #!/usr/bin/env bash
+#
+# Build one or more cryo binaries for cryo_test comparison runs.
+#
+# Configuration (all optional, override via environment):
+#   CRYO_REPO        path to the cryo repository
+#                    (default: the git repo this script lives in)
+#   CRYO_ALLOY_REF   git ref to build as "alloy"  (default: main)
+#   CRYO_ETHERS_REF  git ref to build as "ethers" (default: the pre-alloy
+#                    -migration commit, kept for historical comparison)
+#
+# NOTE: this checks out refs in CRYO_REPO in place. Commit or stash any work in
+# that repository before running.
 
 set -e
 
-# get directory of script
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# make directories
-mkdir -p "$ROOT_DIR/bin"
-mkdir -p "$ROOT_DIR/build/alloy"
-mkdir -p "$ROOT_DIR/build/ethers"
+# Resolve the cryo repository. No paths are hard-coded; the default is the git
+# repository this script is part of.
+CRYO_REPO="${CRYO_REPO:-$(git -C "$ROOT_DIR" rev-parse --show-toplevel)}"
+
+# Git refs to build, overridable via environment.
+ALLOY_REF="${CRYO_ALLOY_REF:-main}"
+ETHERS_REF="${CRYO_ETHERS_REF:-eba6192298e40add4d35d1587511d875f6d770e4}"
+
+mkdir -p "$ROOT_DIR/bin" "$ROOT_DIR/build"
 
 # parse inputs
 BUILD_ALLOY=false
@@ -34,48 +50,27 @@ if [ "$ANY_FLAG_SET" = false ]; then
    BUILD_ALLOY=true
    BUILD_ETHERS=true
 fi
+echo "CRYO_REPO: $CRYO_REPO"
 echo "BUILD_ALLOY: $BUILD_ALLOY"
 echo "BUILD_ETHERS: $BUILD_ETHERS"
 
-# build alloy
+# build a named variant from a given git ref
+build_variant() {
+    local name="$1" ref="$2"
+    echo ""
+    echo "building cryo $name (ref: $ref)"
+    git -C "$CRYO_REPO" checkout "$ref"
+    cargo install \
+        --path "$CRYO_REPO/crates/cli" \
+        --root "$ROOT_DIR/build/$name"
+    rm -f "$ROOT_DIR/bin/cryo_$name"
+    ln -s "$ROOT_DIR/build/$name/bin/cryo" "$ROOT_DIR/bin/cryo_$name"
+    echo "built cryo $name at: $ROOT_DIR/bin/cryo_$name"
+}
+
 if [ "$BUILD_ALLOY" = true ]; then
-    echo "building cryo alloy"
-
-    # go to repo
-    cd ~/repos/cryo
-
-    # check out build
-    git checkout main
-
-    # build cryo
-    cargo install \
-        --path crates/cli \
-        --root "$ROOT_DIR/build/alloy"
-
-    # link to built binary
-    rm -f "$ROOT_DIR/bin/cryo_alloy"
-    ln -s "$ROOT_DIR/build/alloy/bin/cryo" "$ROOT_DIR/bin/cryo_alloy"
-    echo ""
-    echo "built cryo alloy at: $ROOT_DIR/bin/cryo_alloy"
+    build_variant alloy "$ALLOY_REF"
 fi
-
 if [ "$BUILD_ETHERS" = true ]; then
-    echo "building cryo ethers"
-
-    # go to repo
-    cd ~/repos/cryo
-
-    # check out build
-    git checkout eba6192298e40add4d35d1587511d875f6d770e4
-
-    # build cryo
-    cargo install \
-        --path crates/cli \
-        --root "$ROOT_DIR/build/ethers"
-
-    # link to built binary
-    rm -f "$ROOT_DIR/bin/cryo_ethers"
-    ln -s "$ROOT_DIR/build/ethers/bin/cryo" "$ROOT_DIR/bin/cryo_ethers"
-    echo ""
-    echo "built cryo ethers at: $ROOT_DIR/bin/cryo_ethers"
+    build_variant ethers "$ETHERS_REF"
 fi
