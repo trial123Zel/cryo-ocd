@@ -1,0 +1,7 @@
+# Pin the Rust toolchain so builds are reproducible and the `stable` channel
+# advancing cannot silently break clippy. See docs/adr/0002-dependency-modernization.md.
+# Phase 1 may bump this. Formatting uses a separate nightly toolchain because
+# rustfmt.toml relies on unstable options (CI runs `cargo +nightly fmt`).
+[toolchain]
+channel = "1.95.0"
+components = ["clippy"]

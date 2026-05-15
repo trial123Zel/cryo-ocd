@@ -51,4 +51,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
-      - run: cargo fmt --all --check
+      # rust-toolchain.toml pins stable; force nightly here for rustfmt.toml's
+      # unstable options.
+      - run: cargo +nightly fmt --all --check

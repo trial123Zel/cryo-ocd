@@ -134,8 +134,8 @@ impl CollectByBlock for Transactions {
                 vec![None; block.transactions.len()]
             };
 
-        let transactions_with_receips = transactions.into_iter().zip(receipts).collect();
-        Ok((block, transactions_with_receips, query.exclude_failed))
+        let transactions_with_receipts = transactions.into_iter().zip(receipts).collect();
+        Ok((block, transactions_with_receipts, query.exclude_failed))
     }
 
     fn transform(response: Self::Response, columns: &mut Self, query: &Arc<Query>) -> R<()> {
@@ -310,9 +310,9 @@ fn tx_success(tx: &Transaction, receipt: &Option<TransactionReceipt>) -> R<bool>
         if let Some(r) = receipt {
             Ok(r.gas_used == 0)
         } else {
-            return Err(err("could not determine status of transaction"))
+            Err(err("could not determine status of transaction"))
         }
     } else {
-        return Err(err("could not determine status of transaction"))
+        Err(err("could not determine status of transaction"))
     }
 }

@@ -20,7 +20,7 @@ pub(crate) async fn parse_blocks(
         for path in files {
             let column = if path.contains(':') {
                 path.split(':')
-                    .last()
+                    .next_back()
                     .ok_or(ParseError::ParseError("could not parse txs path column".to_string()))?
             } else {
                 "block_number"
@@ -519,7 +519,7 @@ mod tests {
         for (i, block_chunk) in block_chunks.iter().enumerate() {
             let expected_chunk = &expected[i];
             println!("BLOCK_CHUNK {:?}", block_chunk);
-            println!("EXCPECTED_CHUNK {:?}", expected_chunk);
+            println!("EXPECTED_CHUNK {:?}", expected_chunk);
             match expected_chunk {
                 BlockChunk::Numbers(expected_block_numbers) => {
                     assert!(matches!(block_chunk, BlockChunk::Numbers { .. }));
