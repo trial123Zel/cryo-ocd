@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
+#
+# Run a cryo_test comparison between the "alloy" and "ethers" cryo builds
+# produced by ./build_cryo.
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Load environment (e.g. ETH_RPC_URL / RETH_RPC_URL) from the repo-root .env if
+# present. .env is git-ignored; see docs/adr/0005-secret-handling.md.
+CRYO_REPO="${CRYO_REPO:-$(git -C "$ROOT_DIR" rev-parse --show-toplevel)}"
+if [ -f "$CRYO_REPO/.env" ]; then
+    set -a
+    . "$CRYO_REPO/.env"
+    set +a
+fi
 
 python3 -m cryo_test \
     --debug \
