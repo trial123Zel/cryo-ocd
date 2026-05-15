@@ -24,4 +24,11 @@ originates from an upstream contribution.
 - Refreshed issue and pull-request templates, including an implementation-task
   template.
 
+### Fixed
+
+- Corrected typos in collection error messages (`partitions.rs`, `sources.rs`),
+  the documentation summary (`book/SUMMARY.md`), and a block-chunk test
+  (`blocks.rs`). Adopted from upstream PRs paradigmxyz/cryo#220 (@sunxunle),
+  #226 (@Hopium21), and #237 (@solanaXpeter). (#12)
+
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
