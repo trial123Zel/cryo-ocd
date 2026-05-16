@@ -31,7 +31,11 @@ fn df_to_parquet(
 ) -> Result<(), FileError> {
     let file = std::fs::File::create(filename).map_err(|_e| FileError::FileWriteError)?;
     let result = ParquetWriter::new(file)
-        .with_statistics(file_output.parquet_statistics)
+        .with_statistics(if file_output.parquet_statistics {
+            StatisticsOptions::full()
+        } else {
+            StatisticsOptions::empty()
+        })
         .with_compression(file_output.parquet_compression)
         .with_row_group_size(file_output.row_group_size)
         .finish(df);

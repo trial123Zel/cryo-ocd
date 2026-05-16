@@ -3,25 +3,16 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
-use syn::{parse_macro_input, ItemStruct};
+use syn::{parse_macro_input, punctuated::Punctuated, ItemStruct, Path, Token};
 
 /// implements ToDataFrames and ColumnData for struct
 #[proc_macro_attribute]
 pub fn to_df(attrs: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemStruct);
 
-    // parse input args
-    let attrs = parse_macro_input!(attrs as syn::AttributeArgs);
-    let datatypes: Vec<_> = attrs
-        .into_iter()
-        .map(|arg| {
-            if let syn::NestedMeta::Meta(syn::Meta::Path(path)) = arg {
-                path
-            } else {
-                panic!("Expected Meta::Path");
-            }
-        })
-        .collect();
+    // parse input args: a comma-separated list of datatype paths
+    let attrs = parse_macro_input!(attrs with Punctuated::<Path, Token![,]>::parse_terminated);
+    let datatypes: Vec<Path> = attrs.into_iter().collect();
     if datatypes.is_empty() {
         panic!("At least one datatype must be specified");
     }
@@ -81,19 +72,19 @@ pub fn to_df(attrs: TokenStream, input: TokenStream) -> TokenStream {
                             U256Type::Binary => {
                                 match column_encoding {
                                     ColumnEncoding::Binary => {
-                                        cols.push(Series::new(full_name, Vec::<Vec<u8>>::new()))
+                                        cols.push(Series::new(full_name.into(),Vec::<Vec<u8>>::new()))
                                     },
                                     ColumnEncoding::Hex => {
-                                        cols.push(Series::new(full_name, Vec::<String>::new()))
+                                        cols.push(Series::new(full_name.into(),Vec::<String>::new()))
                                     },
                                 }
                             },
-                            U256Type::String => cols.push(Series::new(full_name, Vec::<String>::new())),
-                            U256Type::F32 => cols.push(Series::new(full_name, Vec::<f32>::new())),
-                            U256Type::F64 => cols.push(Series::new(full_name, Vec::<f64>::new())),
-                            U256Type::U32 => cols.push(Series::new(full_name, Vec::<u32>::new())),
-                            U256Type::U64 => cols.push(Series::new(full_name, Vec::<u64>::new())),
-                            U256Type::Decimal128 => cols.push(Series::new(full_name, Vec::<Vec<u8>>::new())),
+                            U256Type::String => cols.push(Series::new(full_name.into(),Vec::<String>::new())),
+                            U256Type::F32 => cols.push(Series::new(full_name.into(),Vec::<f32>::new())),
+                            U256Type::F64 => cols.push(Series::new(full_name.into(),Vec::<f64>::new())),
+                            U256Type::U32 => cols.push(Series::new(full_name.into(),Vec::<u32>::new())),
+                            U256Type::U64 => cols.push(Series::new(full_name.into(),Vec::<u64>::new())),
+                            U256Type::Decimal128 => cols.push(Series::new(full_name.into(),Vec::<Vec<u8>>::new())),
                         }
                     }
                 }
@@ -108,32 +99,32 @@ pub fn to_df(attrs: TokenStream, input: TokenStream) -> TokenStream {
                         match ty {
                             DynSolType::Address => {
                                 match schema.binary_type {
-                                    ColumnEncoding::Binary => cols.push(Series::new(name, Vec::<Vec<u8>>::new())),
-                                    ColumnEncoding::Hex => cols.push(Series::new(name, Vec::<String>::new())),
+                                    ColumnEncoding::Binary => cols.push(Series::new(name.into(),Vec::<Vec<u8>>::new())),
+                                    ColumnEncoding::Hex => cols.push(Series::new(name.into(),Vec::<String>::new())),
                                 }
                             },
                             DynSolType::Bytes => {
                                 match schema.binary_type {
-                                    ColumnEncoding::Binary => cols.push(Series::new(name, Vec::<Vec<u8>>::new())),
-                                    ColumnEncoding::Hex => cols.push(Series::new(name, Vec::<String>::new())),
+                                    ColumnEncoding::Binary => cols.push(Series::new(name.into(),Vec::<Vec<u8>>::new())),
+                                    ColumnEncoding::Hex => cols.push(Series::new(name.into(),Vec::<String>::new())),
                                 }
                             },
                             DynSolType::Int(bits) => {
                                 if bits <= 64 {
-                                    cols.push(Series::new(name, Vec::<i64>::new()))
+                                    cols.push(Series::new(name.into(),Vec::<i64>::new()))
                                 } else {
                                     create_empty_u256_columns(&mut cols, name, &u256_types, &schema.binary_type)
                                 }
                             },
                             DynSolType::Uint(bits) => {
                                 if bits <= 64 {
-                                    cols.push(Series::new(name, Vec::<u64>::new()))
+                                    cols.push(Series::new(name.into(),Vec::<u64>::new()))
                                 } else {
                                     create_empty_u256_columns(&mut cols, name, &u256_types, &schema.binary_type)
                                 }
                             },
-                            DynSolType::Bool => cols.push(Series::new(name, Vec::<bool>::new())),
-                            DynSolType::String => cols.push(Series::new(name, Vec::<String>::new())),
+                            DynSolType::Bool => cols.push(Series::new(name.into(),Vec::<bool>::new())),
+                            DynSolType::String => cols.push(Series::new(name.into(),Vec::<String>::new())),
                             DynSolType::Array(_) => return Err(err("could not generate Array column")),
                             DynSolType::FixedBytes(_) => return Err(err("could not generate FixedBytes column")),
                             DynSolType::FixedArray(_, _) => return Err(err("could not generate FixedArray column")),
@@ -242,7 +233,10 @@ pub fn to_df(attrs: TokenStream, input: TokenStream) -> TokenStream {
 
                 #event_code
 
-                let df = DataFrame::new(cols).map_err(CollectError::PolarsError).sort_by_schema(schema)?;
+                let cols: Vec<Column> = cols.into_iter().map(Column::from).collect();
+                let df = DataFrame::new(self.n_rows as usize, cols)
+                    .map_err(CollectError::PolarsError)
+                    .sort_by_schema(schema)?;
                 let mut output = std::collections::HashMap::new();
                 output.insert(datatype, df);
                 Ok(output)

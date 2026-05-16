@@ -62,8 +62,7 @@ impl LogDecoder {
             .collect();
 
         for log in logs {
-            match self.event.decode_log_parts(log.topics().to_vec(), log.data().data.as_ref(), true)
-            {
+            match self.event.decode_log_parts(log.topics().to_vec(), log.data().data.as_ref()) {
                 Ok(decoded) => {
                     for (idx, param) in decoded.indexed.into_iter().enumerate() {
                         map.entry(indexed_keys[idx].clone()).or_default().push(param);
@@ -140,7 +139,7 @@ impl LogDecoder {
         // length as the input data and map to a series
         let name = format!("event__{}", name);
         if !ints.is_empty() {
-            Ok(vec![Series::new(name.as_str(), ints)])
+            Ok(vec![Series::new(name.as_str().into(), ints)])
         } else if !i256s.is_empty() {
             let mut series_vec = Vec::new();
             for u256_type in u256_types.iter() {
@@ -162,30 +161,30 @@ impl LogDecoder {
             }
             Ok(series_vec)
         } else if !uints.is_empty() {
-            Ok(vec![Series::new(name.as_str(), uints)])
+            Ok(vec![Series::new(name.as_str().into(), uints)])
         } else if !bytes.is_empty() {
             if bytes.len() != chunk_len {
                 return Err(err(mixed_length_err))
             }
-            Ok(vec![Series::new(name.as_str(), bytes)])
+            Ok(vec![Series::new(name.as_str().into(), bytes)])
         } else if !hexes.is_empty() {
             if hexes.len() != chunk_len {
                 return Err(err(mixed_length_err))
             }
-            Ok(vec![Series::new(name.as_str(), hexes)])
+            Ok(vec![Series::new(name.as_str().into(), hexes)])
         } else if !bools.is_empty() {
             if bools.len() != chunk_len {
                 return Err(err(mixed_length_err))
             }
-            Ok(vec![Series::new(name.as_str(), bools)])
+            Ok(vec![Series::new(name.as_str().into(), bools)])
         } else if !strings.is_empty() {
             if strings.len() != chunk_len {
                 return Err(err(mixed_length_err))
             }
-            Ok(vec![Series::new(name.as_str(), strings)])
+            Ok(vec![Series::new(name.as_str().into(), strings)])
         } else {
             // case where no data was passed
-            Ok(vec![Series::new(name.as_str(), vec![None::<u64>; chunk_len])])
+            Ok(vec![Series::new(name.as_str().into(), vec![None::<u64>; chunk_len])])
         }
     }
 }
