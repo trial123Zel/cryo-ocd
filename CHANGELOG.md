@@ -39,6 +39,10 @@ originates from an upstream contribution.
   current versions, for supply-chain safety. Adopts the intent of
   upstream PRs paradigmxyz/cryo#241 (@PixelPil0t1) and #242
   (@Daulox92). (#59)
+- Renamed the `erc721_transfers` contract-address column from `erc20`
+  to `erc721`; the name had been copied verbatim from the
+  `erc20_transfers` dataset. Reported by @ChadRosseau in
+  paradigmxyz/cryo#230. (#65)
 
 ### Removed
 
@@ -59,5 +63,9 @@ originates from an upstream contribution.
   `double_ended_iterator_last`). (#15)
 - cryo's dataframe sort is now stable, so output row order is deterministic
   and reproducible run-to-run; polars 0.53's default sort is unstable.
+- `erc20_transfers` collected by transaction (`--txs`) returned ERC-20
+  Approval logs instead of Transfer logs: the by-transaction filter
+  matched the wrong event signature hash. Reported by @ChadRosseau in
+  paradigmxyz/cryo#231. (#64)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
