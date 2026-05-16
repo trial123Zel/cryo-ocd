@@ -101,7 +101,7 @@ impl CollectByTransaction for Erc20Transfers {
 fn is_erc20_transfer(log: &Log) -> bool {
     log.topics().len() == 3 &&
         log.data().data.len() == 32 &&
-        log.topics()[0] == ERC20::Approval::SIGNATURE_HASH
+        log.topics()[0] == ERC20::Transfer::SIGNATURE_HASH
 }
 
 /// process block into columns
@@ -128,4 +128,36 @@ fn process_erc20_transfers(logs: Vec<Log>, columns: &mut Erc20Transfers, schema:
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn log_with_signature(sig: B256) -> Log {
+        Log {
+            inner: alloy::primitives::Log {
+                address: alloy::primitives::Address::ZERO,
+                data: alloy::primitives::LogData::new_unchecked(
+                    vec![sig, B256::ZERO, B256::ZERO],
+                    vec![0u8; 32].into(),
+                ),
+            },
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn is_erc20_transfer_accepts_transfer_logs() {
+        let log = log_with_signature(ERC20::Transfer::SIGNATURE_HASH);
+        assert!(is_erc20_transfer(&log));
+    }
+
+    #[test]
+    fn is_erc20_transfer_rejects_approval_logs() {
+        // Regression (issue #231): is_erc20_transfer matched the Approval
+        // signature, so collect_by_transaction returned Approval logs.
+        let log = log_with_signature(ERC20::Approval::SIGNATURE_HASH);
+        assert!(!is_erc20_transfer(&log));
+    }
 }
