@@ -16,7 +16,7 @@ pub struct Erc721Transfers {
     transaction_index: Vec<u32>,
     log_index: Vec<u32>,
     transaction_hash: Vec<Vec<u8>>,
-    erc20: Vec<Vec<u8>>,
+    erc721: Vec<Vec<u8>>,
     from_address: Vec<Vec<u8>>,
     to_address: Vec<Vec<u8>>,
     token_id: Vec<U256>,
@@ -32,7 +32,7 @@ impl Dataset for Erc721Transfers {
             "transaction_index",
             "log_index",
             "transaction_hash",
-            "erc20",
+            "erc721",
             "from_address",
             "to_address",
             "token_id",
@@ -117,11 +117,25 @@ fn process_erc721_transfers(
             store!(schema, columns, transaction_index, ti as u32);
             store!(schema, columns, log_index, li as u32);
             store!(schema, columns, transaction_hash, tx.to_vec());
-            store!(schema, columns, erc20, log.address().to_vec());
+            store!(schema, columns, erc721, log.address().to_vec());
             store!(schema, columns, from_address, log.topics()[1][12..].to_vec());
             store!(schema, columns, to_address, log.topics()[2][12..].to_vec());
             store!(schema, columns, token_id, log.topics()[3].into());
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn contract_column_is_named_erc721() {
+        // Regression (issue #230): the contract-address column was named
+        // `erc20`, copied from the erc20_transfers dataset.
+        let columns = Erc721Transfers::column_types();
+        assert!(columns.contains_key("erc721"), "expected an `erc721` column");
+        assert!(!columns.contains_key("erc20"), "`erc20` column should be renamed");
+    }
 }
