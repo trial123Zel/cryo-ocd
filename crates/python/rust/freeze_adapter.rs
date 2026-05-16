@@ -65,8 +65,8 @@ use cryo_cli::{run, Args};
     )
 )]
 #[allow(clippy::too_many_arguments)]
-pub fn _freeze(
-    py: Python<'_>,
+pub fn _freeze<'py>(
+    py: Python<'py>,
     datatype: Option<Vec<String>>,
     blocks: Option<Vec<String>>,
     remember: bool,
@@ -124,7 +124,7 @@ pub fn _freeze(
     verbose: bool,
     no_verbose: bool,
     event_signature: Option<String>,
-) -> PyResult<&PyAny> {
+) -> PyResult<Bound<'py, PyAny>> {
     if let Some(command) = command {
         freeze_command(py, command)
     } else if let Some(datatype) = datatype {
@@ -187,9 +187,9 @@ pub fn _freeze(
             event_signature,
         };
 
-        pyo3_asyncio::tokio::future_into_py(py, async move {
+        pyo3_async_runtimes::tokio::future_into_py(py, async move {
             match run(args).await {
-                Ok(Some(result)) => Python::with_gil(|py| {
+                Ok(Some(result)) => Python::attach(|py| {
                     // let paths = PyDict::new(py);
                     // for (key, values) in &result.paths {
                     //     let key = key.dataset().name();
@@ -199,15 +199,14 @@ pub fn _freeze(
                     // let paths = paths.to_object(py);
 
                     let dict = [
-                        ("n_completed".to_string(), result.completed.len().into_py(py)),
-                        ("n_skipped".to_string(), result.skipped.len().into_py(py)),
-                        ("n_errored".to_string(), result.errored.len().into_py(py)),
-                        // ("paths".to_string(), paths),
+                        ("n_completed", result.completed.len()),
+                        ("n_skipped", result.skipped.len()),
+                        ("n_errored", result.errored.len()),
                     ]
-                    .into_py_dict(py);
-                    Ok(dict.to_object(py))
+                    .into_py_dict(py)?;
+                    Ok(dict.into_any().unbind())
                 }),
-                Ok(None) => Ok(Python::with_gil(|py| py.None())),
+                Ok(None) => Ok(Python::attach(|py| py.None())),
                 _ => Err(PyErr::new::<PyTypeError, _>("failed")),
             }
         })
@@ -216,11 +215,11 @@ pub fn _freeze(
     }
 }
 
-fn freeze_command(py: Python<'_>, command: String) -> PyResult<&PyAny> {
-    pyo3_asyncio::tokio::future_into_py(py, async move {
+fn freeze_command<'py>(py: Python<'py>, command: String) -> PyResult<Bound<'py, PyAny>> {
+    pyo3_async_runtimes::tokio::future_into_py(py, async move {
         let args = cryo_cli::parse_str(command.as_str()).await.expect("could not parse inputs");
         match run(args).await {
-            Ok(Some(result)) => Python::with_gil(|py| {
+            Ok(Some(result)) => Python::attach(|py| {
                 // let paths = PyDict::new(py);
                 // for (key, values) in &result.paths {
                 //     let key = key.dataset().name();
@@ -230,15 +229,14 @@ fn freeze_command(py: Python<'_>, command: String) -> PyResult<&PyAny> {
                 // let paths = paths.to_object(py);
 
                 let dict = [
-                    ("n_completed".to_string(), result.completed.len().into_py(py)),
-                    ("n_skipped".to_string(), result.skipped.len().into_py(py)),
-                    ("n_errored".to_string(), result.errored.len().into_py(py)),
-                    // ("paths".to_string(), paths),
+                    ("n_completed", result.completed.len()),
+                    ("n_skipped", result.skipped.len()),
+                    ("n_errored", result.errored.len()),
                 ]
-                .into_py_dict(py);
-                Ok(dict.to_object(py))
+                .into_py_dict(py)?;
+                Ok(dict.into_any().unbind())
             }),
-            Ok(None) => Ok(Python::with_gil(|py| py.None())),
+            Ok(None) => Ok(Python::attach(|py| py.None())),
             _ => Err(PyErr::new::<PyTypeError, _>("failed")),
         }
     })
