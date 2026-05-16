@@ -23,7 +23,7 @@ The merge gate for every code task: `cargo build` + `cargo test`,
 | Phase | Milestone | Theme |
 |-------|-----------|-------|
 | 0 | Foundation & Governance | Scaffolding, governance, CI, secret handling |
-| 1 | Dependency Modernization | alloy 1.x, polars, pyo3, syn 2.0; retire clap_cryo |
+| 1 | Dependency Modernization | alloy 2.x, polars, pyo3, syn 2; retire clap_cryo |
 | 2 | Quick Bug Fixes | Small, well-understood fixes with reference patches |
 | 3 | Correctness Bugs | Data-correctness bugs needing node reproduction |
 | 4 | Features & Enhancements | In-scope feature work from the community backlog |
@@ -86,7 +86,7 @@ baseline diff. `P1-8` is independent. Primary reference: upstream PR #244
 `main` across all datatypes as the regression baseline.
 
 **P1-1 — alloy: provider/source layer.** *M, depends P1-0.* Migrate
-`types/sources.rs`, `types/rpc_params.rs` to alloy 1.x.
+`types/sources.rs`, `types/rpc_params.rs` to alloy 2.x.
 
 **P1-2 — alloy: primitive & RPC-type fixes.** *M, depends P1-1.* The ~40 dataset
 files that only use primitive/RPC types.
