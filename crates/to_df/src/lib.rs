@@ -3,25 +3,16 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use proc_macro2::Span;
 use quote::quote;
-use syn::{parse_macro_input, ItemStruct};
+use syn::{parse_macro_input, punctuated::Punctuated, ItemStruct, Path, Token};
 
 /// implements ToDataFrames and ColumnData for struct
 #[proc_macro_attribute]
 pub fn to_df(attrs: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemStruct);
 
-    // parse input args
-    let attrs = parse_macro_input!(attrs as syn::AttributeArgs);
-    let datatypes: Vec<_> = attrs
-        .into_iter()
-        .map(|arg| {
-            if let syn::NestedMeta::Meta(syn::Meta::Path(path)) = arg {
-                path
-            } else {
-                panic!("Expected Meta::Path");
-            }
-        })
-        .collect();
+    // parse input args: a comma-separated list of datatype paths
+    let attrs = parse_macro_input!(attrs with Punctuated::<Path, Token![,]>::parse_terminated);
+    let datatypes: Vec<Path> = attrs.into_iter().collect();
     if datatypes.is_empty() {
         panic!("At least one datatype must be specified");
     }
