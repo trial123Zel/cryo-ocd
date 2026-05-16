@@ -1,6 +1,6 @@
 //! cryo_cli is a cli for cryo_freeze
 
-use clap_cryo::Parser;
+use clap::Parser;
 
 mod args;
 mod parse;
