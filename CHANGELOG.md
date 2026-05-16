@@ -26,6 +26,25 @@ originates from an upstream contribution.
 - `rust-toolchain.toml` pinning the Rust toolchain (1.95.0) so the `stable`
   channel advancing cannot silently break CI. (#15)
 
+### Changed
+
+- Dependency modernization (Phase 1): migrated the workspace off
+  long-unmaintained versions, with no change to cryo's data output
+  (verified column-by-column against a pre-migration baseline):
+  `alloy` 0.6.4 → 2.0, `polars` 0.38.3 → 0.53, `pyo3` 0.20 → 0.27 and
+  `pyo3-polars` 0.12 → 0.26, `syn` 1 → 2 in `cryo_to_df`, `clap_cryo`
+  (an unmaintained clap fork) → mainline `clap` (see ADR-0003), and
+  `pyo3-asyncio` (abandoned) → its successor `pyo3-async-runtimes`.
+- GitHub Actions workflows pinned to full commit SHAs and bumped to
+  current versions, for supply-chain safety. Adopts the intent of
+  upstream PRs paradigmxyz/cryo#241 (@PixelPil0t1) and #242
+  (@Daulox92). (#59)
+
+### Removed
+
+- `lzo` parquet compression, which polars 0.53 no longer supports
+  (uncompressed/snappy/lz4/gzip/brotli/zstd are unaffected).
+
 ### Fixed
 
 - Corrected typos in collection error messages (`partitions.rs`, `sources.rs`),
@@ -38,5 +57,7 @@ originates from an upstream contribution.
 - Resolved all remaining `clippy` lints across the workspace under Rust 1.95
   (`needless_return`, `useless_vec`, `len_zero`, `unnecessary_unwrap`,
   `double_ended_iterator_last`). (#15)
+- cryo's dataframe sort is now stable, so output row order is deterministic
+  and reproducible run-to-run; polars 0.53's default sort is unstable.
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
