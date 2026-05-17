@@ -41,6 +41,12 @@ originates from an upstream contribution.
   ("raw") transaction, as a binary column. Opt-in via `--include-columns
   raw`. Re-implemented from upstream PR paradigmxyz/cryo#180 (@0xMelkor).
   (#85)
+- `deploy_address` column on the `transactions` dataset — the contract
+  address created by a contract-deployment transaction, taken from the
+  transaction receipt. Opt-in via `--include-columns deploy_address`;
+  requesting it causes receipts to be fetched. Re-implemented from
+  upstream PRs paradigmxyz/cryo#215 (@sslivkoff) and #189
+  (@LatentSpaceExplorer). (#86)
 
 ### Changed
 
