@@ -2,6 +2,12 @@
 
 - **Status:** Accepted
 - **Date:** 2026-05-15
+- **Amended:** 2026-05-16 — the CI `cryo_test` job compares each pull request's
+  `cryo` build against a freshly built `main` build (a live pull-request-vs-
+  `main` diff), rather than against a frozen golden snapshot. `main` is itself
+  gated by this job, so it stays known-good, and there is no frozen baseline to
+  regenerate when cryo's output changes on purpose. The pre-Phase-1 `P1-0`
+  capture is kept as a historical reference. See issue #70.
 
 ## Context
 
