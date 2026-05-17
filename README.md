@@ -53,8 +53,8 @@ The simplest way to use `cryo` is as a cli tool:
 #### Method 1: install from source
 
 ```bash
-git clone https://github.com/paradigmxyz/cryo
-cd cryo
+git clone https://github.com/trial123Zel/cryo-ocd
+cd cryo-ocd
 cargo install --path ./crates/cli
 ```
 
@@ -87,8 +87,8 @@ pip install cryo
 
 ```bash
 pip install maturin
-git clone https://github.com/paradigmxyz/cryo
-cd cryo/crates/python
+git clone https://github.com/trial123Zel/cryo-ocd
+cd cryo-ocd/crates/python
 maturin build --release
 pip install --force-reinstall <OUTPUT_OF_MATURIN_BUILD>.whl
 ```
