@@ -12,6 +12,15 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 readme = "README.md"
+# cryo returns its results as polars DataFrames across the pyo3-polars FFI
+# boundary; pyo3-polars imports `polars` at runtime to reconstruct them, so it
+# is a hard runtime dependency even though the Python sources never import it.
+dependencies = ["polars"]
+
+[project.optional-dependencies]
+# output_format="pandas" converts the result via polars' DataFrame.to_pandas(),
+# which requires pandas and pyarrow.
+pandas = ["pandas", "pyarrow"]
 
 
 [tool.maturin]
