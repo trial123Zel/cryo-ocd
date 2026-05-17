@@ -98,11 +98,70 @@ pub(crate) fn process_contracts(
             store!(schema, columns, factory, create.from.to_vec());
             store!(schema, columns, init_code, create.init.to_vec());
             store!(schema, columns, code, result.code.to_vec());
-            store!(schema, columns, init_code_hash, keccak256(result.code.clone()).to_vec());
-            store!(schema, columns, code_hash, keccak256(create.init.clone()).to_vec());
+            store!(schema, columns, init_code_hash, keccak256(create.init.clone()).to_vec());
+            store!(schema, columns, code_hash, keccak256(result.code.clone()).to_vec());
             store!(schema, columns, n_init_code_bytes, create.init.len() as u32);
             store!(schema, columns, n_code_bytes, result.code.len() as u32);
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use alloy::{
+        primitives::{Bytes, B256},
+        rpc::types::trace::parity::{CreateAction, CreateOutput, TransactionTrace},
+    };
+    use std::collections::HashMap;
+
+    #[test]
+    fn init_code_hash_and_code_hash_are_not_swapped() {
+        // Regression (PR #249): init_code_hash held the keccak256 of the
+        // deployed code and code_hash the keccak256 of the init code.
+        let init_code = Bytes::from_static(&[0x60, 0x01, 0x60, 0x00]);
+        let deployed_code = Bytes::from_static(&[0x60, 0x02, 0x60, 0x00, 0xf3]);
+
+        let trace = LocalizedTransactionTrace {
+            trace: TransactionTrace {
+                action: Action::Create(CreateAction {
+                    init: init_code.clone(),
+                    ..Default::default()
+                }),
+                result: Some(TraceOutput::Create(CreateOutput {
+                    address: Address::ZERO,
+                    code: deployed_code.clone(),
+                    gas_used: 0,
+                })),
+                ..Default::default()
+            },
+            block_hash: Some(B256::ZERO),
+            block_number: Some(1),
+            transaction_hash: None,
+            transaction_position: None,
+        };
+
+        let schema = Datatype::Contracts
+            .table_schema(
+                &[U256Type::Binary],
+                &ColumnEncoding::Hex,
+                &None,
+                &None,
+                &Some(vec!["all".to_string()]),
+                None,
+                None,
+            )
+            .unwrap();
+        let mut schemas = HashMap::new();
+        schemas.insert(Datatype::Contracts, schema);
+        let mut columns = Contracts::default();
+
+        process_contracts(&[trace], &mut columns, &schemas).unwrap();
+
+        assert_eq!(columns.init_code_hash, vec![keccak256(init_code.clone()).to_vec()]);
+        assert_eq!(columns.code_hash, vec![keccak256(deployed_code.clone()).to_vec()]);
+        // the two inputs differ, so a swap would be caught
+        assert_ne!(columns.init_code_hash, columns.code_hash);
+    }
 }
