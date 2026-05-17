@@ -43,6 +43,10 @@ originates from an upstream contribution.
   to `erc721`; the name had been copied verbatim from the
   `erc20_transfers` dataset. Reported by @ChadRosseau in
   paradigmxyz/cryo#230. (#65)
+- The CI `cryo_test data diff` job now performs a real column-by-column
+  comparison of each pull request's `cryo` output against `main`,
+  replacing the earlier build-and-connectivity smoke check (completes
+  ADR-0004's validation gate). (#74)
 
 ### Removed
 

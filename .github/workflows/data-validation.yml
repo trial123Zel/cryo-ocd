@@ -7,6 +7,13 @@ name: Data Validation
 # for untrusted actors or fork pull requests. See:
 #   docs/adr/0004-validation-strategy.md
 #   docs/adr/0005-secret-handling.md
+#
+# The job builds `cryo` from the pull request and from `main`, runs the
+# `cryo_test` harness against a live node, and diffs the Parquet output
+# column-by-column. A pull request that does not change cryo's output passes;
+# one that does change it surfaces the diff for review. `main` is itself gated
+# by this job, so it stays a known-good comparison point — there is no frozen
+# baseline to maintain.
 
 on:
   pull_request:
@@ -23,7 +30,16 @@ jobs:
     runs-on: [self-hosted]
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Check out the pull request
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          path: pr
+
+      - name: Check out main (comparison point)
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+          path: base
 
       - name: Check runner configuration
         run: |
@@ -35,14 +51,26 @@ jobs:
           fi
           echo "runner configured (node endpoint intentionally not printed)"
 
-      - name: Build cryo (release)
-        run: cargo build --release --workspace
+      - name: Build cryo from the pull request
+        run: cargo build --release -p cryo_cli --manifest-path pr/Cargo.toml
 
-      - name: cryo_test data validation
+      - name: Build cryo from main
+        run: cargo build --release -p cryo_cli --manifest-path base/Cargo.toml
+
+      - name: cryo_test data diff (pull request vs main)
         run: |
-          # Smoke check: confirm the freshly built cryo can reach the node.
-          ./target/release/cryo blocks -b 1000:1010 \
+          cd pr/crates/python/python/cryo_test
+          # The cryo_test harness exits 0 regardless of the result, so the
+          # outcome is read from its "Total differences" summary line.
+          "$HOME/cryo-ocd-baseline/venv/bin/python" -m cryo_test \
+            --executable \
+              main="$GITHUB_WORKSPACE/base/target/release/cryo" \
+              pr="$GITHUB_WORKSPACE/pr/target/release/cryo" \
             --rpc "$RETH_RPC_URL" \
-            --output-dir "$RUNNER_TEMP/cryo_ci" --overwrite
-          # TODO(P1-0): replace this smoke check with a full cryo_test diff
-          # against the golden baseline once the baseline is captured.
+            --dir "$RUNNER_TEMP/cryo_test_diff" \
+            2>&1 | tee "$RUNNER_TEMP/cryo_test.log"
+          if ! grep -qE "Total differences: 0([^0-9]|$)" "$RUNNER_TEMP/cryo_test.log"; then
+            echo "::error::cryo_test found data differences between this pull request and main — review the diff above."
+            exit 1
+          fi
+          echo "cryo_test: no data differences between the pull request and main"
