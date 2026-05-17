@@ -35,9 +35,9 @@ migration, the quick-fix batch, and the correctness-bug batch have all landed.
 Two minor follow-ups remain open against their milestones — `#60` (migrate
 `python_release.yml` to `upload-artifact` / `download-artifact` v4) and `#37` /
 `P3-2` (`address_appearances` on Erigon-3 archive nodes, pending
-re-verification). Phase 4 is in progress: `P4-1`–`P4-5` and `P4-9` are merged;
-`P4-15` (release binaries + Dockerfile) is next. Per-task status is shown in the
-Phase 4 table below — ✅ done, 🔄 in progress, blank = not started.
+re-verification). Phase 4 is in progress: `P4-1`–`P4-5`, `P4-9`, and `P4-15`
+are merged. Per-task status is shown in the Phase 4 table below — ✅ done,
+🔄 in progress, blank = not started.
 
 ---
 
@@ -185,7 +185,7 @@ own ADR and sub-issue breakdown when their milestone opens.
 | P4-12 | `erigon_getHeaderByNumber` batch perf | issue #35 | |
 | P4-13 ★ | Cloud/S3 sink via a generalized `Sink` trait | issue #47, PR #92 (@sslivkoff) | |
 | P4-14 ★ | Direct Reth DB access, bypassing JSON-RPC | issues #3, #156, upstream PR #163 | |
-| P4-15 | Release binaries via CI + Dockerfile | issue #229, PR #40 (@distributedstatemachine) | 🔄 Next |
+| P4-15 | Release binaries via CI + Dockerfile | issue #229, PR #40 (@distributedstatemachine) | ✅ Done |
 | P4-16 | Python docs, docstrings, notebook example, progress bar | issues #205, #178, PRs #186 (@peyha), #169 (@0xstubbs) | |
 | P4-17 | Array & tuple support in log/event decoding (candidate epic) | issue #79, upstream #184 | |
 

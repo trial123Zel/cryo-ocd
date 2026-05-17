@@ -47,6 +47,11 @@ originates from an upstream contribution.
   requesting it causes receipts to be fetched. Re-implemented from
   upstream PRs paradigmxyz/cryo#215 (@sslivkoff) and #189
   (@LatentSpaceExplorer). (#86)
+- Prebuilt `cryo` release binaries and a `Dockerfile`. A new `release`
+  workflow builds the CLI for x86_64 Linux, macOS, and Windows on every
+  `v*` tag and publishes the archives as a GitHub Release; a multi-stage
+  `Dockerfile` builds a slim runtime image. Re-implemented from upstream
+  PR paradigmxyz/cryo#40 (@distributedstatemachine). (#57)
 
 ### Changed
 
