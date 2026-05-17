@@ -25,6 +25,10 @@ originates from an upstream contribution.
   template.
 - `rust-toolchain.toml` pinning the Rust toolchain (1.95.0) so the `stable`
   channel advancing cannot silently break CI. (#15)
+- The startup schema summary now lists event-decoded columns
+  (`event__<name>`, with their ABI types) when an `--event-signature`
+  is supplied — previously only a dataset's static columns were shown.
+  From the event-decoding checklist in paradigmxyz/cryo#56. (#80)
 
 ### Changed
 

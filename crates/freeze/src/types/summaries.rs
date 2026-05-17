@@ -384,6 +384,13 @@ fn print_schema(name: &Datatype, schema: &Table) {
             }
         }
     }
+    // event-decoded columns come from --event-signature and are resolved at
+    // decode time, so they are not part of the static schema; list them too
+    if let Some(decoder) = &schema.log_decoder {
+        for param in decoder.event.inputs.iter() {
+            print_bullet("event__".to_string() + param.name.as_str(), param.ty.as_str());
+        }
+    }
     println!();
     if let Some(sort_cols) = schema.sort_columns.clone() {
         println!("sorting {} by: {}", name.name(), sort_cols.join(", "));
