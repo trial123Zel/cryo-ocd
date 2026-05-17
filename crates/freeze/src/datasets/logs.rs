@@ -227,4 +227,48 @@ mod tests {
         assert_eq!(df.height(), 0);
         assert!(df.column("event__orderHash").is_ok(), "FixedBytes column generated");
     }
+
+    /// P4-9 (#51): an empty event-decoded result must still produce columns
+    /// with consistent dtypes for every scalar parameter type.
+    #[test]
+    fn empty_logs_decode_scalar_event_params_consistently() {
+        let decoder = LogDecoder::new(
+            "event E(address indexed who, uint64 small, int64 signed, bool flag, \
+             string note, bytes blob, bytes32 fixed, uint256 big)"
+                .to_string(),
+        )
+        .unwrap();
+        let schema = Datatype::Logs
+            .table_schema(
+                &[U256Type::Binary],
+                &ColumnEncoding::Hex,
+                &None,
+                &None,
+                &None,
+                None,
+                Some(decoder),
+            )
+            .unwrap();
+        let mut schemas = HashMap::new();
+        schemas.insert(Datatype::Logs, schema);
+
+        let result = Logs::default().create_dfs(&schemas, 1);
+
+        assert!(result.is_ok(), "empty scalar event columns should not error: {:?}", result.err());
+        let df = result.unwrap().remove(&Datatype::Logs).unwrap();
+        assert_eq!(df.height(), 0);
+        for column in [
+            "event__who",
+            "event__small",
+            "event__signed",
+            "event__flag",
+            "event__note",
+            "event__blob",
+            "event__fixed",
+        ] {
+            assert!(df.column(column).is_ok(), "missing column {column}");
+        }
+        // a uint256 parameter expands to a representation-suffixed column
+        assert!(df.column("event__big_binary").is_ok(), "missing event__big_binary column");
+    }
 }
