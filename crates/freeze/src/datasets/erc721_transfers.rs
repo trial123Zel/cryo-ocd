@@ -1,6 +1,6 @@
 use crate::*;
 use alloy::{
-    primitives::{B256, U256},
+    primitives::{Address, U256},
     rpc::types::{Filter, Log, Topic},
     sol_types::SolEvent,
 };
@@ -61,12 +61,11 @@ impl CollectByBlock for Erc721Transfers {
         let mut topics: [Topic; 4] = Default::default();
         topics[0] = ERC721::Transfer::SIGNATURE_HASH.into();
         if let Some(from_address) = &request.from_address {
-            let v = B256::from_slice(from_address);
-            topics[1] = v.into();
+            // an indexed address occupies a full 32-byte topic, left-padded
+            topics[1] = Address::from_slice(from_address).into_word().into();
         };
         if let Some(to_address) = &request.to_address {
-            let v = B256::from_slice(to_address);
-            topics[2] = v.into();
+            topics[2] = Address::from_slice(to_address).into_word().into();
         };
         let filter = Filter { topics, ..request.ethers_log_filter()? };
         let logs = source.get_logs(&filter).await?;

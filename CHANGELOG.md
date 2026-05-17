@@ -113,5 +113,13 @@ originates from an upstream contribution.
   dependencies, so a fresh `pip install cryo` failed at runtime with
   `ModuleNotFoundError`. Reported by @Evan-Kim2028 in
   paradigmxyz/cryo#137. (#76)
+- `erc20_transfers` and `erc721_transfers` no longer panic when given
+  `--from-address` or `--to-address`. The address was built into a
+  log-topic filter at the wrong width (`B256::from_slice` on a 20-byte
+  address); it is now left-padded into the 32-byte topic word that an
+  indexed address occupies. All five datasets in the upstream request
+  (`transactions`, `traces`, `native_transfers`, `erc20_transfers`,
+  `erc721_transfers`) now honour the address filters. Reported by
+  @sslivkoff in paradigmxyz/cryo#97. (#78)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
