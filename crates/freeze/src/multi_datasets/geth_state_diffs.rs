@@ -114,7 +114,6 @@ pub(crate) fn process_geth_diffs(
     let nonce_schema = schemas.get(&Datatype::GethNonceDiffs);
     let storage_schema = schemas.get(&Datatype::GethStorageDiffs);
 
-    let blank = &AccountState::default();
     for (tx_index, (trace, tx)) in traces.iter().zip(txs).enumerate() {
         let index = &(*block_number, tx_index as u32, tx.clone());
         let addresses: Vec<_> = trace
@@ -125,12 +124,7 @@ pub(crate) fn process_geth_diffs(
             .into_iter()
             .collect();
         for address in addresses.into_iter() {
-            let (pre, post) = match (trace.pre.get(address), trace.post.get(address)) {
-                (Some(pre), Some(post)) => (pre, post),
-                (Some(pre), None) => (pre, blank),
-                (None, Some(post)) => (blank, post),
-                (None, None) => (blank, blank),
-            };
+            let (pre, post) = resolve_pre_post(trace.pre.get(address), trace.post.get(address));
             if let (Some(balances), Some(schema)) = (balances.as_mut(), balance_schema) {
                 add_balances(address, pre.balance, post.balance, balances, schema, index)?;
             }
@@ -259,5 +253,85 @@ where
         (Some(pre), None) => (pre, new),
         (None, Some(post)) => (new, post),
         (None, None) => (new, new),
+    }
+}
+
+/// Resolve the pre- and post-transaction state of a single account.
+///
+/// geth's prestate tracer in diff mode records, in `post`, only the fields a
+/// transaction actually changed. A field present in `pre` but absent from
+/// `post` was accessed but left unchanged, so its post value equals its pre
+/// value — those fields are filled in here from `pre`. An account absent from
+/// `post` entirely was self-destructed, and its post state is correctly empty
+/// (so a destroyed account's `to_value` resolves to zero, not to its pre
+/// value). Storage is intentionally left untouched: issue #245 scopes this to
+/// balance, nonce, and code, and `add_storages` already diffs slot-by-slot.
+fn resolve_pre_post(
+    pre: Option<&AccountState>,
+    post: Option<&AccountState>,
+) -> (AccountState, AccountState) {
+    match (pre, post) {
+        (Some(pre), Some(post)) => {
+            let mut merged = post.clone();
+            merged.balance = merged.balance.or(pre.balance);
+            merged.nonce = merged.nonce.or(pre.nonce);
+            if merged.code.is_none() {
+                merged.code = pre.code.clone();
+            }
+            (pre.clone(), merged)
+        }
+        (Some(pre), None) => (pre.clone(), AccountState::default()),
+        (None, Some(post)) => (AccountState::default(), post.clone()),
+        (None, None) => (AccountState::default(), AccountState::default()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unchanged_field_absent_from_post_inherits_pre_value() {
+        // Regression (issue #245): geth's diff-mode `post` omits fields the
+        // transaction did not change; the post value of an omitted field must
+        // equal its pre value, not a zero default.
+        let pre =
+            AccountState { balance: Some(U256::from(100)), nonce: Some(7), ..Default::default() };
+        // the tx bumped the nonce but left the balance untouched
+        let post = AccountState { nonce: Some(8), ..Default::default() };
+
+        let (resolved_pre, resolved_post) = resolve_pre_post(Some(&pre), Some(&post));
+
+        assert_eq!(resolved_pre.balance, Some(U256::from(100)));
+        assert_eq!(resolved_post.balance, Some(U256::from(100)), "unchanged balance");
+        assert_eq!(resolved_post.nonce, Some(8), "changed nonce preserved");
+    }
+
+    #[test]
+    fn destroyed_account_has_empty_post_state() {
+        // An account present only in `pre` was self-destructed; its post state
+        // is empty, so to_value resolves to zero rather than the pre value.
+        let pre = AccountState {
+            balance: Some(U256::from(100)),
+            nonce: Some(7),
+            code: Some(Bytes::from_static(&[1, 2, 3])),
+            ..Default::default()
+        };
+
+        let (_, resolved_post) = resolve_pre_post(Some(&pre), None);
+
+        assert_eq!(resolved_post.balance, None);
+        assert_eq!(resolved_post.nonce, None);
+        assert_eq!(resolved_post.code, None);
+    }
+
+    #[test]
+    fn changed_field_keeps_post_value() {
+        let pre = AccountState { balance: Some(U256::from(100)), ..Default::default() };
+        let post = AccountState { balance: Some(U256::from(250)), ..Default::default() };
+
+        let (_, resolved_post) = resolve_pre_post(Some(&pre), Some(&post));
+
+        assert_eq!(resolved_post.balance, Some(U256::from(250)));
     }
 }

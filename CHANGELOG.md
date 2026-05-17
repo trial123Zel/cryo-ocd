@@ -67,5 +67,11 @@ originates from an upstream contribution.
   Approval logs instead of Transfer logs: the by-transaction filter
   matched the wrong event signature hash. Reported by @ChadRosseau in
   paradigmxyz/cryo#231. (#64)
+- `geth_state_diffs` reported a `to_value` of zero for any balance,
+  nonce, or code that a transaction touched but left unchanged: geth's
+  diff-mode tracer omits unchanged fields from its `post` state. Such
+  fields now correctly carry their pre-transaction value, while
+  genuinely self-destructed accounts still resolve to zero. Reported by
+  @phqb in paradigmxyz/cryo#245. (#66)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
