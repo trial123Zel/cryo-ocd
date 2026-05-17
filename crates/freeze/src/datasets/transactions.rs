@@ -1,6 +1,7 @@
 use crate::*;
 use alloy::{
     consensus::Transaction as ConsensusTransaction,
+    eips::eip2718::Encodable2718,
     primitives::{Address, TxKind, U256},
     rpc::types::{
         Block, BlockTransactions, BlockTransactionsKind, Transaction, TransactionReceipt,
@@ -38,6 +39,7 @@ pub struct Transactions {
     r: Vec<Vec<u8>>,
     s: Vec<Vec<u8>>,
     v: Vec<bool>,
+    raw: Vec<Vec<u8>>,
 }
 
 #[async_trait::async_trait]
@@ -273,6 +275,9 @@ pub(crate) fn process_transaction(
     store!(schema, columns, r, tx.inner.signature().r().to_vec_u8());
     store!(schema, columns, s, tx.inner.signature().s().to_vec_u8());
 
+    // the EIP-2718-encoded transaction (the canonical "raw" transaction)
+    store!(schema, columns, raw, tx.inner.encoded_2718());
+
     Ok(())
 }
 
@@ -314,5 +319,17 @@ fn tx_success(tx: &Transaction, receipt: &Option<TransactionReceipt>) -> R<bool>
         }
     } else {
         Err(err("could not determine status of transaction"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn transactions_has_raw_column() {
+        // P4-3 (#45): the raw (EIP-2718-encoded) transaction column.
+        let columns = Transactions::column_types();
+        assert_eq!(columns.get("raw"), Some(&ColumnType::Binary));
     }
 }
