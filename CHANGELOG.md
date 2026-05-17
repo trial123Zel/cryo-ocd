@@ -29,6 +29,10 @@ originates from an upstream contribution.
   (`event__<name>`, with their ABI types) when an `--event-signature`
   is supplied — previously only a dataset's static columns were shown.
   From the event-decoding checklist in paradigmxyz/cryo#56. (#80)
+- `transaction_count` column on the `blocks` dataset — the number of
+  transactions in the block. Opt-in via `--include-columns
+  transaction_count` (or `--columns all`). Re-implemented from upstream
+  PR paradigmxyz/cryo#223 (@phqb). (#83)
 
 ### Changed
 

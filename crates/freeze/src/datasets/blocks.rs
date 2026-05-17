@@ -30,6 +30,7 @@ pub struct Blocks {
     nonce: Vec<Option<Vec<u8>>>,
     base_fee_per_gas: Vec<Option<u64>>,
     withdrawals_root: Vec<Option<Vec<u8>>>,
+    transaction_count: Vec<u32>,
     chain_id: Vec<u64>,
 }
 
@@ -121,5 +122,38 @@ pub(crate) fn process_block<TX>(block: Block<TX>, columns: &mut Blocks, schema: 
     store!(schema, columns, mix_hash, Some(block.header.mix_hash.to_vec()));
     store!(schema, columns, nonce, Some(block.header.nonce.0.to_vec()));
     store!(schema, columns, withdrawals_root, block.header.withdrawals_root.map(|x| x.0.to_vec()));
+    store!(schema, columns, transaction_count, block.transactions.len() as u32);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use alloy::{primitives::B256, rpc::types::BlockTransactions};
+
+    #[test]
+    fn process_block_populates_transaction_count() {
+        // P4-5 (#47): transaction_count is the number of transactions in
+        // the block.
+        let block: Block = Block {
+            transactions: BlockTransactions::Hashes(vec![B256::ZERO; 3]),
+            ..Default::default()
+        };
+        let schema = Datatype::Blocks
+            .table_schema(
+                &[U256Type::Binary],
+                &ColumnEncoding::Hex,
+                &None,
+                &None,
+                &Some(vec!["transaction_count".to_string()]),
+                None,
+                None,
+            )
+            .unwrap();
+        let mut columns = Blocks::default();
+
+        process_block(block, &mut columns, &schema).unwrap();
+
+        assert_eq!(columns.transaction_count, vec![3u32]);
+    }
 }
