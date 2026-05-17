@@ -126,7 +126,14 @@ pub fn to_df(attrs: TokenStream, input: TokenStream) -> TokenStream {
                             DynSolType::Bool => cols.push(Series::new(name.into(),Vec::<bool>::new())),
                             DynSolType::String => cols.push(Series::new(name.into(),Vec::<String>::new())),
                             DynSolType::Array(_) => return Err(err("could not generate Array column")),
-                            DynSolType::FixedBytes(_) => return Err(err("could not generate FixedBytes column")),
+                            DynSolType::FixedBytes(_) => {
+                                // encoded like Bytes/Address: an empty result is
+                                // a valid empty column, not an error (issue #238)
+                                match schema.binary_type {
+                                    ColumnEncoding::Binary => cols.push(Series::new(name.into(),Vec::<Vec<u8>>::new())),
+                                    ColumnEncoding::Hex => cols.push(Series::new(name.into(),Vec::<String>::new())),
+                                }
+                            },
                             DynSolType::FixedArray(_, _) => return Err(err("could not generate FixedArray column")),
                             DynSolType::Tuple(_) => return Err(err("could not generate Tuple column")),
                             DynSolType::Function => return Err(err("could not generate Function column")),

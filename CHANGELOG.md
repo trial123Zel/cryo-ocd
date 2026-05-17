@@ -73,5 +73,10 @@ originates from an upstream contribution.
   fields now correctly carry their pre-transaction value, while
   genuinely self-destructed accounts still resolve to zero. Reported by
   @phqb in paradigmxyz/cryo#245. (#66)
+- Querying `logs` with an `--event-signature` containing a `bytes32`
+  (FixedBytes) parameter no longer fails with "could not generate
+  FixedBytes column" when the query matches no rows; an empty result
+  now produces an empty dataset. Reported by @mempirate in
+  paradigmxyz/cryo#238. (#67)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main

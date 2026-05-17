@@ -189,3 +189,42 @@ fn process_logs(logs: Vec<Log>, columns: &mut Logs, schema: &Table) -> R<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+
+    /// Regression (issue #238): an empty `logs` result whose event signature
+    /// has a `bytes32` (FixedBytes) parameter must produce an empty dataset,
+    /// not a "could not generate FixedBytes column" error.
+    #[test]
+    fn empty_logs_with_fixedbytes_event_param_is_not_an_error() {
+        let decoder = LogDecoder::new(
+            "event OrderFilled(address indexed maker, bytes32 orderHash, uint256 remaining)"
+                .to_string(),
+        )
+        .unwrap();
+        let schema = Datatype::Logs
+            .table_schema(
+                &[U256Type::Binary],
+                &ColumnEncoding::Hex,
+                &None,
+                &None,
+                &None,
+                None,
+                Some(decoder),
+            )
+            .unwrap();
+        let mut schemas = HashMap::new();
+        schemas.insert(Datatype::Logs, schema);
+
+        // Logs::default() => n_rows 0, event_cols empty: the empty-column path.
+        let result = Logs::default().create_dfs(&schemas, 1);
+
+        assert!(result.is_ok(), "empty FixedBytes column should not error: {:?}", result.err());
+        let df = result.unwrap().remove(&Datatype::Logs).unwrap();
+        assert_eq!(df.height(), 0);
+        assert!(df.column("event__orderHash").is_ok(), "FixedBytes column generated");
+    }
+}
