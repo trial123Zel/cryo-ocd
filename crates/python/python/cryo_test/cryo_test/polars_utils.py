@@ -148,7 +148,7 @@ def find_row_differences(
     for other_name, other_df in data_list[1:]:
         # row count
         if len(df) != len(other_df):
-            difference = (
+            differences.append(
                 name + ' and ' + other_name + ' have different number of rows'
             )
             continue
