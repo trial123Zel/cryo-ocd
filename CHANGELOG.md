@@ -78,5 +78,9 @@ originates from an upstream contribution.
   FixedBytes column" when the query matches no rows; an empty result
   now produces an empty dataset. Reported by @mempirate in
   paradigmxyz/cryo#238. (#67)
+- Excluding a column that is part of a dataset's `default_sort` (for
+  example `create_index` on `contracts`) no longer zeroes the output.
+  Sorting now skips any sort column not present in the result. Reported
+  by @dreaded369 in paradigmxyz/cryo#221. (#68)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
