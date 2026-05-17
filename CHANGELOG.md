@@ -105,5 +105,13 @@ originates from an upstream contribution.
   were swapped: `init_code_hash` held the keccak256 of the deployed
   code and `code_hash` the keccak256 of the init code. Each column now
   hashes its correct input. Cross-referenced paradigmxyz/cryo#249. (#73)
+- The `cryo` Python package now declares its runtime dependencies:
+  `polars` (required — cryo returns polars DataFrames across the
+  pyo3-polars FFI boundary) and a `pandas` extra
+  (`pip install cryo[pandas]`, pulling `pandas` and `pyarrow`) for
+  `output_format="pandas"`. The package previously declared no
+  dependencies, so a fresh `pip install cryo` failed at runtime with
+  `ModuleNotFoundError`. Reported by @Evan-Kim2028 in
+  paradigmxyz/cryo#137. (#76)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
