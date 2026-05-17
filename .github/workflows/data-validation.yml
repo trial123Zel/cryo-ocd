@@ -14,6 +14,10 @@ name: Data Validation
 # one that does change it surfaces the diff for review. `main` is itself gated
 # by this job, so it stays a known-good comparison point — there is no frozen
 # baseline to maintain.
+#
+# Compiled artifacts are cached in a persistent CARGO_TARGET_DIR on the
+# runner's disk (the runner host persists between jobs), so the dependency
+# tree is not recompiled from scratch each run — only changed crates rebuild.
 
 on:
   pull_request:
@@ -52,10 +56,28 @@ jobs:
           echo "runner configured (node endpoint intentionally not printed)"
 
       - name: Build cryo from the pull request
-        run: cargo build --release -p cryo_cli --manifest-path pr/Cargo.toml
+        run: |
+          # Persistent build cache: the pull-request and main builds share one
+          # CARGO_TARGET_DIR on the runner's disk, so registry crates (alloy,
+          # polars, ...) compile once and are reused across runs. The fresh
+          # `pr`/`base` checkouts otherwise force a cold build every time.
+          mkdir -p "$HOME/.cache/cryo-ci"
+          target="$HOME/.cache/cryo-ci/target"
+          # reset the cache if it outgrows the runner's disk headroom
+          if [ -d "$target" ] && [ "$(du -sm "$target" | cut -f1)" -gt 6000 ]; then
+            echo "build cache exceeds 6 GB — clearing it for a cold rebuild"
+            rm -rf "$target"
+          fi
+          export CARGO_TARGET_DIR="$target"
+          cargo build --release -p cryo_cli --manifest-path pr/Cargo.toml
+          # the binary path is shared, so copy it out before the main build
+          cp "$target/release/cryo" "$RUNNER_TEMP/cryo-pr"
 
       - name: Build cryo from main
-        run: cargo build --release -p cryo_cli --manifest-path base/Cargo.toml
+        run: |
+          export CARGO_TARGET_DIR="$HOME/.cache/cryo-ci/target"
+          cargo build --release -p cryo_cli --manifest-path base/Cargo.toml
+          cp "$CARGO_TARGET_DIR/release/cryo" "$RUNNER_TEMP/cryo-main"
 
       - name: cryo_test data diff (pull request vs main)
         run: |
@@ -64,8 +86,8 @@ jobs:
           # outcome is read from its "Total differences" summary line.
           "$HOME/cryo-ocd-baseline/venv/bin/python" -m cryo_test \
             --executable \
-              main="$GITHUB_WORKSPACE/base/target/release/cryo" \
-              pr="$GITHUB_WORKSPACE/pr/target/release/cryo" \
+              main="$RUNNER_TEMP/cryo-main" \
+              pr="$RUNNER_TEMP/cryo-pr" \
             --rpc "$RETH_RPC_URL" \
             --dir "$RUNNER_TEMP/cryo_test_diff" \
             2>&1 | tee "$RUNNER_TEMP/cryo_test.log"
