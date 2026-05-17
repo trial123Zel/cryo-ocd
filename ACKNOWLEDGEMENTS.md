@@ -40,6 +40,8 @@ changes are merged. Issue and pull-request numbers below refer to the upstream
   collection-summary divide-by-zero report (issue #150).
 - [@Daulox92](https://github.com/Daulox92) — GitHub Actions supply-chain
   hardening (PR #242).
+- [@distributedstatemachine](https://github.com/distributedstatemachine) —
+  prebuilt release binaries and a `Dockerfile` (PR #40).
 - [@dreaded369](https://github.com/dreaded369) — `default_sort`
   column-exclusion report (issue #221).
 - [@dylantirandaz](https://github.com/dylantirandaz) — reference patch for the

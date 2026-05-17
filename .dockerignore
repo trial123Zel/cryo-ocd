@@ -1,0 +1,16 @@
+# Keep the build context small and reproducible: the builder stage compiles
+# from source inside the image, so host build output and VCS metadata must not
+# leak in.
+target/
+.git/
+.github/
+
+# Collected datasets and local environment files.
+*.parquet
+*.parquet_tmp
+*.csv
+*.csv_tmp
+*.json
+*.json_tmp
+.env
+*.env
