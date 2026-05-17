@@ -37,6 +37,10 @@ originates from an upstream contribution.
   — the EIP-4844 header fields, populated for post-Dencun blocks. Opt-in
   via `--include-columns`. Adopted from upstream PR paradigmxyz/cryo#181
   (@peyha). (#84)
+- `raw` column on the `transactions` dataset — the EIP-2718-encoded
+  ("raw") transaction, as a binary column. Opt-in via `--include-columns
+  raw`. Re-implemented from upstream PR paradigmxyz/cryo#180 (@0xMelkor).
+  (#85)
 
 ### Changed
 
