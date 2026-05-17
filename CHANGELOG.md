@@ -80,6 +80,9 @@ originates from an upstream contribution.
 - The "install from source" instructions in `README.md` cloned the
   upstream `paradigmxyz/cryo` repository instead of this fork
   (`trial123Zel/cryo-ocd`), for both the CLI and the Python package. (#87)
+- `README.md` credited `ethers.rs` as cryo's RPC library and as the
+  source of its column-naming convention; cryo-ocd uses `alloy`, the
+  successor that superseded ethers.rs. (#90)
 - Corrected typos in collection error messages (`partitions.rs`, `sources.rs`),
   the documentation summary (`book/SUMMARY.md`), and a block-chunk test
   (`blocks.rs`). Adopted from upstream PRs paradigmxyz/cryo#220 (@sunxunle),
