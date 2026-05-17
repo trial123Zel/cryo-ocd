@@ -15,13 +15,13 @@ pub struct Traces {
     action_from: Vec<Option<Vec<u8>>>,
     action_to: Vec<Option<Vec<u8>>>,
     action_value: Vec<String>,
-    action_gas: Vec<Option<u32>>,
+    action_gas: Vec<Option<u64>>,
     action_input: Vec<Option<Vec<u8>>>,
     action_call_type: Vec<Option<String>>,
     action_init: Vec<Option<Vec<u8>>>,
     action_reward_type: Vec<Option<String>>,
     action_type: Vec<String>,
-    result_gas_used: Vec<Option<u32>>,
+    result_gas_used: Vec<Option<u64>>,
     result_output: Vec<Option<Vec<u8>>>,
     result_code: Vec<Option<Vec<u8>>>,
     result_address: Vec<Option<Vec<u8>>>,
@@ -152,7 +152,7 @@ fn process_action(action: &Action, columns: &mut Traces, schema: &Table) {
             store!(schema, columns, action_from, Some(action.from.to_vec()));
             store!(schema, columns, action_to, Some(action.to.to_vec()));
             store!(schema, columns, action_value, action.value.to_string());
-            store!(schema, columns, action_gas, Some(action.gas as u32));
+            store!(schema, columns, action_gas, Some(action.gas));
             store!(schema, columns, action_input, Some(action.input.to_vec()));
             store!(
                 schema,
@@ -167,7 +167,7 @@ fn process_action(action: &Action, columns: &mut Traces, schema: &Table) {
             store!(schema, columns, action_from, Some(action.from.to_vec()));
             store!(schema, columns, action_to, None);
             store!(schema, columns, action_value, action.value.to_string());
-            store!(schema, columns, action_gas, Some(action.gas as u32));
+            store!(schema, columns, action_gas, Some(action.gas));
             store!(schema, columns, action_input, None);
             store!(schema, columns, action_call_type, None);
             store!(schema, columns, action_init, Some(action.init.to_vec()));
@@ -204,13 +204,13 @@ fn process_action(action: &Action, columns: &mut Traces, schema: &Table) {
 fn process_result(result: &Option<TraceOutput>, columns: &mut Traces, schema: &Table) {
     match result {
         Some(TraceOutput::Call(result)) => {
-            store!(schema, columns, result_gas_used, Some(result.gas_used as u32));
+            store!(schema, columns, result_gas_used, Some(result.gas_used));
             store!(schema, columns, result_output, Some(result.output.to_vec()));
             store!(schema, columns, result_code, None);
             store!(schema, columns, result_address, None);
         }
         Some(TraceOutput::Create(result)) => {
-            store!(schema, columns, result_gas_used, Some(result.gas_used as u32));
+            store!(schema, columns, result_gas_used, Some(result.gas_used));
             store!(schema, columns, result_output, None);
             store!(schema, columns, result_code, Some(result.code.to_vec()));
             store!(schema, columns, result_address, Some(result.address.to_vec()));
@@ -286,4 +286,53 @@ pub(crate) fn filter_failed_traces(
     }
 
     filtered
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use alloy::{
+        primitives::Bytes,
+        rpc::types::trace::parity::{CallAction, CallOutput},
+    };
+
+    fn all_columns_schema() -> Table {
+        Datatype::Traces
+            .table_schema(
+                &[U256Type::Binary],
+                &ColumnEncoding::Hex,
+                &None,
+                &None,
+                &Some(vec!["all".to_string()]),
+                None,
+                None,
+            )
+            .unwrap()
+    }
+
+    #[test]
+    fn action_gas_above_u32_max_is_not_truncated() {
+        // Regression (issue #173): trace gas was stored as u32 via an
+        // `as u32` cast; on chains such as BSC the gas exceeds u32::MAX, so
+        // the cast silently truncated the value.
+        let big_gas: u64 = u32::MAX as u64 + 1_000_000;
+        let action = Action::Call(CallAction { gas: big_gas, ..Default::default() });
+        let mut columns = Traces::default();
+
+        process_action(&action, &mut columns, &all_columns_schema());
+
+        assert_eq!(columns.action_gas, vec![Some(big_gas)]);
+    }
+
+    #[test]
+    fn result_gas_used_above_u32_max_is_not_truncated() {
+        let big_gas: u64 = u32::MAX as u64 + 42;
+        let result =
+            Some(TraceOutput::Call(CallOutput { gas_used: big_gas, output: Bytes::new() }));
+        let mut columns = Traces::default();
+
+        process_result(&result, &mut columns, &all_columns_schema());
+
+        assert_eq!(columns.result_gas_used, vec![Some(big_gas)]);
+    }
 }

@@ -87,5 +87,10 @@ originates from an upstream contribution.
   trimmed to it instead of being discarded, so the max collected block
   is no longer rounded down to the last full chunk boundary. Reported
   by @BowTiedDevil in paradigmxyz/cryo#193. (#69)
+- `traces` and `trace_calls` no longer truncate gas values above
+  `u32::MAX`. The `action_gas` and `result_gas_used` columns are now
+  `u64`; on chains such as BSC where trace gas exceeds `u32::MAX`, the
+  previous `as u32` cast silently truncated the value. Reported by
+  @shouc in paradigmxyz/cryo#173. (#71)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
