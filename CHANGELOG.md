@@ -92,5 +92,10 @@ originates from an upstream contribution.
   `u64`; on chains such as BSC where trace gas exceeds `u32::MAX`, the
   previous `as u32` cast silently truncated the value. Reported by
   @shouc in paradigmxyz/cryo#173. (#71)
+- The collection summary no longer panics with "attempt to divide by
+  zero" when `--align` leaves no chunks to collect. The errored/skipped/
+  collected percentages now resolve to 0% instead of dividing by a zero
+  chunk count. Reported by @Cybourgeoisie in paradigmxyz/cryo#150 and
+  @0xhanh in paradigmxyz/cryo#125. (#72)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main

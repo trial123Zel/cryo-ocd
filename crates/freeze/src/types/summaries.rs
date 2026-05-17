@@ -463,7 +463,7 @@ pub(crate) fn print_cryo_conclusion(
             "  {:>width$} / {} ({}%)",
             freeze_summary.errored.len().separate_with_commas(),
             &n_chunks_str,
-            format_float((100 * freeze_summary.errored.len() / n_chunks) as f64),
+            format_float(percent(freeze_summary.errored.len(), n_chunks)),
             width = width
         ),
         4,
@@ -474,7 +474,7 @@ pub(crate) fn print_cryo_conclusion(
             "  {:>width$} / {} ({}%)",
             freeze_summary.skipped.len().separate_with_commas(),
             n_chunks_str,
-            format_float((100 * freeze_summary.skipped.len() / n_chunks) as f64),
+            format_float(percent(freeze_summary.skipped.len(), n_chunks)),
             width = width
         ),
         4,
@@ -485,7 +485,7 @@ pub(crate) fn print_cryo_conclusion(
             "{:>width$} / {} ({}%)",
             freeze_summary.completed.len().separate_with_commas(),
             n_chunks_str,
-            format_float((100 * freeze_summary.completed.len() / n_chunks) as f64),
+            format_float(percent(freeze_summary.completed.len(), n_chunks)),
             width = width
         ),
         4,
@@ -583,4 +583,35 @@ fn format_float(number: f64) -> String {
         format!("{:0>width$}", frac_part, width = decimal_places).trim_end_matches('0').to_string();
 
     format!("{}.{}", int_part.separate_with_commas(), frac_str)
+}
+
+/// `numerator` as an integer-valued percentage of `denominator`.
+///
+/// Returns 0.0 when `denominator` is 0 — which happens when `--align`
+/// leaves no chunks to collect, so `n_chunks` is 0. The percentage figures
+/// in the collection summary previously divided by `n_chunks` directly and
+/// panicked with "attempt to divide by zero".
+fn percent(numerator: usize, denominator: usize) -> f64 {
+    (100 * numerator).checked_div(denominator).unwrap_or(0) as f64
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn percent_with_zero_denominator_does_not_panic() {
+        // Regression (issues #150, #125): `--align` can leave zero chunks,
+        // making n_chunks 0; the summary's percentage calc then panicked
+        // with "attempt to divide by zero".
+        assert_eq!(percent(0, 0), 0.0);
+        assert_eq!(percent(5, 0), 0.0);
+    }
+
+    #[test]
+    fn percent_matches_integer_division() {
+        assert_eq!(percent(1, 4), 25.0);
+        assert_eq!(percent(1, 3), 33.0);
+        assert_eq!(percent(3, 3), 100.0);
+    }
 }
