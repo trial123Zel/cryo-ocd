@@ -97,5 +97,9 @@ originates from an upstream contribution.
   collected percentages now resolve to 0% instead of dividing by a zero
   chunk count. Reported by @Cybourgeoisie in paradigmxyz/cryo#150 and
   @0xhanh in paradigmxyz/cryo#125. (#72)
+- The `contracts` dataset's `init_code_hash` and `code_hash` columns
+  were swapped: `init_code_hash` held the keccak256 of the deployed
+  code and `code_hash` the keccak256 of the init code. Each column now
+  hashes its correct input. Cross-referenced paradigmxyz/cryo#249. (#73)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
