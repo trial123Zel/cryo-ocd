@@ -33,6 +33,10 @@ originates from an upstream contribution.
   transactions in the block. Opt-in via `--include-columns
   transaction_count` (or `--columns all`). Re-implemented from upstream
   PR paradigmxyz/cryo#223 (@phqb). (#83)
+- `blob_gas_used` and `excess_blob_gas` columns on the `blocks` dataset
+  — the EIP-4844 header fields, populated for post-Dencun blocks. Opt-in
+  via `--include-columns`. Adopted from upstream PR paradigmxyz/cryo#181
+  (@peyha). (#84)
 
 ### Changed
 

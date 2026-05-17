@@ -31,6 +31,8 @@ pub struct Blocks {
     base_fee_per_gas: Vec<Option<u64>>,
     withdrawals_root: Vec<Option<Vec<u8>>>,
     transaction_count: Vec<u32>,
+    blob_gas_used: Vec<Option<u64>>,
+    excess_blob_gas: Vec<Option<u64>>,
     chain_id: Vec<u64>,
 }
 
@@ -123,6 +125,8 @@ pub(crate) fn process_block<TX>(block: Block<TX>, columns: &mut Blocks, schema: 
     store!(schema, columns, nonce, Some(block.header.nonce.0.to_vec()));
     store!(schema, columns, withdrawals_root, block.header.withdrawals_root.map(|x| x.0.to_vec()));
     store!(schema, columns, transaction_count, block.transactions.len() as u32);
+    store!(schema, columns, blob_gas_used, block.header.blob_gas_used);
+    store!(schema, columns, excess_blob_gas, block.header.excess_blob_gas);
     Ok(())
 }
 
@@ -155,5 +159,13 @@ mod tests {
         process_block(block, &mut columns, &schema).unwrap();
 
         assert_eq!(columns.transaction_count, vec![3u32]);
+    }
+
+    #[test]
+    fn blocks_has_eip4844_columns() {
+        // P4-1 (#43): EIP-4844 block fields, both u64.
+        let columns = Blocks::column_types();
+        assert_eq!(columns.get("blob_gas_used"), Some(&ColumnType::UInt64));
+        assert_eq!(columns.get("excess_blob_gas"), Some(&ColumnType::UInt64));
     }
 }
