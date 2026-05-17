@@ -7,7 +7,11 @@
 #   docker run --rm -v "$PWD:/data" -e ETH_RPC_URL cryo blocks 18M:18.001M
 
 # --- builder -----------------------------------------------------------------
-FROM rust:1.95.0-slim AS builder
+# Pinned to the bookworm suite so the builder's glibc matches the
+# debian:bookworm-slim runtime below. A newer suite here (the unsuffixed
+# `-slim` tag now resolves to trixie) links cryo against a glibc the runtime
+# image does not provide.
+FROM rust:1.95.0-slim-bookworm AS builder
 
 # The rustls crypto backends (aws-lc-sys, ring) build C/assembly sources and
 # need CMake and Perl in addition to the C compiler the rust image ships.
