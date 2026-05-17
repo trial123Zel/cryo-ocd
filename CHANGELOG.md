@@ -82,5 +82,10 @@ originates from an upstream contribution.
   example `create_index` on `contracts`) no longer zeroes the output.
   Sorting now skips any sort column not present in the result. Reported
   by @dreaded369 in paradigmxyz/cryo#221. (#68)
+- `--reorg-buffer` no longer drops the partial tail chunk when `latest`
+  is the range end. The chunk straddling the reorg-safe ceiling is now
+  trimmed to it instead of being discarded, so the max collected block
+  is no longer rounded down to the last full chunk boundary. Reported
+  by @BowTiedDevil in paradigmxyz/cryo#193. (#69)
 
 [Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main

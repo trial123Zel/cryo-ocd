@@ -1,7 +1,7 @@
 use polars::prelude::*;
 use std::collections::HashMap;
 
-use cryo_freeze::{BlockChunk, ChunkData, Datatype, ParseError, Source, Subchunk, Table};
+use cryo_freeze::{BlockChunk, Datatype, ParseError, Source, Subchunk, Table};
 
 use crate::args::Args;
 
@@ -374,11 +374,23 @@ async fn apply_reorg_buffer(
             let max_allowed = latest_block - reorg_filter;
             Ok(block_chunks
                 .into_iter()
-                .filter_map(|x| match x.max_value() {
-                    Some(max_block) if max_block <= max_allowed => Some(x),
-                    _ => None,
-                })
+                .filter_map(|x| clamp_chunk_to_max(x, max_allowed))
                 .collect())
+        }
+    }
+}
+
+/// Clamp a block chunk to a maximum allowed block. A chunk straddling the
+/// limit is trimmed to it rather than dropped, so a partial tail chunk is
+/// preserved. Returns `None` only when the entire chunk lies beyond the limit.
+fn clamp_chunk_to_max(chunk: BlockChunk, max_allowed: u64) -> Option<BlockChunk> {
+    match chunk {
+        BlockChunk::Range(start, end) => {
+            (start <= max_allowed).then(|| BlockChunk::Range(start, end.min(max_allowed)))
+        }
+        BlockChunk::Numbers(numbers) => {
+            let kept: Vec<u64> = numbers.into_iter().filter(|n| *n <= max_allowed).collect();
+            (!kept.is_empty()).then_some(BlockChunk::Numbers(kept))
         }
     }
 }
@@ -716,5 +728,42 @@ mod tests {
         }
         mock_server.spawn().await;
         block_number_test_helper(tests, mock_ipc_path).await;
+    }
+
+    // Regression (issue #193): with --reorg-buffer set, the partial tail chunk
+    // was dropped rather than clamped to the reorg-safe ceiling.
+    #[test]
+    fn reorg_buffer_clamps_straddling_range_chunk() {
+        match clamp_chunk_to_max(BlockChunk::Range(20_030_000, 20_030_787), 20_030_779) {
+            Some(BlockChunk::Range(start, end)) => {
+                assert_eq!(start, 20_030_000);
+                assert_eq!(end, 20_030_779, "tail chunk trimmed to the reorg-safe max");
+            }
+            other => panic!("expected a clamped Range, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn reorg_buffer_keeps_fully_safe_range_chunk() {
+        match clamp_chunk_to_max(BlockChunk::Range(20_000_000, 20_000_999), 20_030_779) {
+            Some(BlockChunk::Range(start, end)) => {
+                assert_eq!((start, end), (20_000_000, 20_000_999));
+            }
+            other => panic!("expected the chunk unchanged, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn reorg_buffer_drops_range_chunk_entirely_past_max() {
+        let clamped = clamp_chunk_to_max(BlockChunk::Range(20_031_000, 20_031_999), 20_030_779);
+        assert!(clamped.is_none(), "a chunk wholly beyond the buffer is dropped");
+    }
+
+    #[test]
+    fn reorg_buffer_filters_numbers_chunk() {
+        match clamp_chunk_to_max(BlockChunk::Numbers(vec![10, 20, 30, 40]), 25) {
+            Some(BlockChunk::Numbers(kept)) => assert_eq!(kept, vec![10, 20]),
+            other => panic!("expected the safe numbers kept, got {:?}", other),
+        }
     }
 }
