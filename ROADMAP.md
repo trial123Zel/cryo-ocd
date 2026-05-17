@@ -20,15 +20,24 @@ The merge gate for every code task: `cargo build` + `cargo test`,
 
 ## Phase overview
 
-| Phase | Milestone | Theme |
-|-------|-----------|-------|
-| 0 | Foundation & Governance | Scaffolding, governance, CI, secret handling |
-| 1 | Dependency Modernization | alloy 2.x, polars, pyo3, syn 2; retire clap_cryo |
-| 2 | Quick Bug Fixes | Small, well-understood fixes with reference patches |
-| 3 | Correctness Bugs | Data-correctness bugs needing node reproduction |
-| 4 | Features & Enhancements | In-scope feature work from the community backlog |
+| Phase | Milestone | Theme | Status |
+|-------|-----------|-------|--------|
+| 0 | Foundation & Governance | Scaffolding, governance, CI, secret handling | ✅ Complete |
+| 1 | Dependency Modernization | alloy 2.x, polars, pyo3, syn 2; retire clap_cryo | ✅ Complete |
+| 2 | Quick Bug Fixes | Small, well-understood fixes with reference patches | ✅ Complete |
+| 3 | Correctness Bugs | Data-correctness bugs needing node reproduction | ✅ Complete |
+| 4 | Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress |
 
 Housekeeping tasks (`H-*`) are low-risk and batched alongside other phases.
+
+**Status snapshot (2026-05-17).** Phases 0–3 are complete: the dependency
+migration, the quick-fix batch, and the correctness-bug batch have all landed.
+Two minor follow-ups remain open against their milestones — `#60` (migrate
+`python_release.yml` to `upload-artifact` / `download-artifact` v4) and `#37` /
+`P3-2` (`address_appearances` on Erigon-3 archive nodes, pending
+re-verification). Phase 4 is in progress: `P4-1`–`P4-5` and `P4-9` are merged;
+`P4-15` (release binaries + Dockerfile) is next. Per-task status is shown in the
+Phase 4 table below — ✅ done, 🔄 in progress, blank = not started.
 
 ---
 
@@ -160,24 +169,30 @@ re-verify before doing separate work.
 In-scope enhancements from the community backlog. The three epics (★) get their
 own ADR and sub-issue breakdown when their milestone opens.
 
-| Task | Feature | Upstream / credit |
-|------|---------|-------------------|
-| P4-1 | EIP-4844 block fields (`blob_gas_used`, `excess_blob_gas`) | PR #181 (@peyha) |
-| P4-2 | Transaction deploy/contract address column | PR #215 (@sslivkoff), #189 (@LatentSpaceExplorer) |
-| P4-3 | Raw transaction column | PR #180 (@0xMelkor) |
-| P4-4 | `--to/--from-address` filtering for more datasets | issue #97 |
-| P4-5 | `transaction_count` column on blocks | upstream PR #223 |
-| P4-6 | OP Stack receipt fields | issue #155 |
-| P4-7 | WebSocket support | issue #65 |
-| P4-8 ★ | `--function-signature` filtering + calldata decoding for `txs` | issue #140, PRs #145 (@cool-mestorf), #149 (@DoTheBestToGetTheBest) |
-| P4-9 | Event decoding: u256 handling, array/tuple support | issues #56, #184 |
-| P4-10 | Multiple RPC providers + graceful rate-limiting | issues #132, #5 |
-| P4-11 | Incremental dataset consolidation | issue #29 |
-| P4-12 | `erigon_getHeaderByNumber` batch perf | issue #35 |
-| P4-13 ★ | Cloud/S3 sink via a generalized `Sink` trait | issue #47, PR #92 (@sslivkoff) |
-| P4-14 ★ | Direct Reth DB access, bypassing JSON-RPC | issues #3, #156, upstream PR #163 |
-| P4-15 | Release binaries via CI + Dockerfile | issue #229, PR #40 (@distributedstatemachine) |
-| P4-16 | Python docs, docstrings, notebook example, progress bar | issues #205, #178, PRs #186 (@peyha), #169 (@0xstubbs) |
+| Task | Feature | Upstream / credit | Status |
+|------|---------|-------------------|--------|
+| P4-1 | EIP-4844 block fields (`blob_gas_used`, `excess_blob_gas`) | PR #181 (@peyha) | ✅ Done |
+| P4-2 | Transaction deploy/contract address column | PR #215 (@sslivkoff), #189 (@LatentSpaceExplorer) | ✅ Done |
+| P4-3 | Raw transaction column | PR #180 (@0xMelkor) | ✅ Done |
+| P4-4 | `--to/--from-address` filtering for more datasets | issue #97 | ✅ Done |
+| P4-5 | `transaction_count` column on blocks | upstream PR #223 | ✅ Done |
+| P4-6 | OP Stack receipt fields | issue #155 | |
+| P4-7 | WebSocket support | issue #65 | |
+| P4-8 ★ | `--function-signature` filtering + calldata decoding for `txs` | issue #140, PRs #145 (@cool-mestorf), #149 (@DoTheBestToGetTheBest) | |
+| P4-9 | Event decoding: u256 handling, empty-result datatypes, schema-summary display | issues #56, #184 | ✅ Done |
+| P4-10 | Multiple RPC providers + graceful rate-limiting | issues #132, #5 | |
+| P4-11 | Incremental dataset consolidation | issue #29 | |
+| P4-12 | `erigon_getHeaderByNumber` batch perf | issue #35 | |
+| P4-13 ★ | Cloud/S3 sink via a generalized `Sink` trait | issue #47, PR #92 (@sslivkoff) | |
+| P4-14 ★ | Direct Reth DB access, bypassing JSON-RPC | issues #3, #156, upstream PR #163 | |
+| P4-15 | Release binaries via CI + Dockerfile | issue #229, PR #40 (@distributedstatemachine) | 🔄 Next |
+| P4-16 | Python docs, docstrings, notebook example, progress bar | issues #205, #178, PRs #186 (@peyha), #169 (@0xstubbs) | |
+| P4-17 | Array & tuple support in log/event decoding (candidate epic) | issue #79, upstream #184 | |
+
+`P4-17` was broken out of `P4-9` during scope review: array/tuple decoding is
+design-heavy — nested type representation and the interaction with cryo's u256
+multi-representation — and may warrant its own ADR and sub-issue breakdown if
+pursued as an epic. See [#79](https://github.com/trial123Zel/cryo-ocd/issues/79).
 
 ---
 
@@ -191,6 +206,7 @@ Low-risk, batched.
 | H-2 | Modernize `std::io::Error` construction in `build.rs` | PR #234 (@strmfos) |
 | H-3 | Typo / docs batch — the Phase 0 warm-up PR | PRs #220 (@sunxunle), #226 (@Hopium21), #235 (@0xAlexKorn), #237 (@solanaXpeter) |
 | H-4 | Full `clippy` pass (after Phase 1) | PR #246 (@bh2smith) |
+| H-5 | Repo-maintenance refresh ahead of the release candidate | — |
 
 ---
 

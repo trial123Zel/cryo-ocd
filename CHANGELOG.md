@@ -77,6 +77,9 @@ originates from an upstream contribution.
 
 ### Fixed
 
+- The "install from source" instructions in `README.md` cloned the
+  upstream `paradigmxyz/cryo` repository instead of this fork
+  (`trial123Zel/cryo-ocd`), for both the CLI and the Python package. (#87)
 - Corrected typos in collection error messages (`partitions.rs`, `sources.rs`),
   the documentation summary (`book/SUMMARY.md`), and a block-chunk test
   (`blocks.rs`). Adopted from upstream PRs paradigmxyz/cryo#220 (@sunxunle),
