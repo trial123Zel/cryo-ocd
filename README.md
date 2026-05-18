@@ -58,9 +58,19 @@ For a more complex example, see the [Uniswap Example](./examples/uniswap.sh).
 
 ## Installation
 
-The simplest way to use `cryo` is as a cli tool:
+cryo-ocd is not published to crates.io or PyPI. Install the `cryo` CLI one of three ways.
 
-#### Method 1: install from source
+#### Prebuilt binary (recommended)
+
+Download the archive for your platform from the [latest release](https://github.com/trial123Zel/cryo-ocd/releases), extract it, and move the `cryo` binary onto your `PATH`:
+
+| Platform | Archive |
+| :- | :- |
+| Linux, x86_64 | `cryo-<version>-x86_64-unknown-linux-gnu.tar.gz` |
+| macOS, Apple Silicon | `cryo-<version>-aarch64-apple-darwin.tar.gz` |
+| Windows, x86_64 | `cryo-<version>-x86_64-pc-windows-msvc.zip` |
+
+#### Build from source
 
 ```bash
 git clone https://github.com/trial123Zel/cryo-ocd
@@ -68,40 +78,32 @@ cd cryo-ocd
 cargo install --path ./crates/cli
 ```
 
-This method requires having rust installed. See [rustup](https://rustup.rs/) for instructions.
+Requires a Rust toolchain (see [rustup](https://rustup.rs/)) and a C compiler — cryo's TLS dependencies build C sources. Make sure `~/.cargo/bin` is on your `PATH`.
 
-#### Method 2: install from crates.io
+#### Docker
 
 ```bash
-cargo install cryo_cli
+git clone https://github.com/trial123Zel/cryo-ocd
+cd cryo-ocd
+docker build -t cryo .
+docker run --rm -v "$PWD:/data" -e ETH_RPC_URL cryo blocks -b 18000000:18000010
 ```
 
-This method requires having rust installed. See [rustup](https://rustup.rs/) for instructions.
+The image is built from the repository `Dockerfile`; it is not published to a registry.
 
-Make sure that `~/.cargo/bin` is on your `PATH`. One way to do this is by adding the line `export PATH="$HOME/.cargo/bin:$PATH"` to your `~/.bashrc` or `~/.profile`.
+### Python package
 
-### Python Installation
-
-`cryo` can also be installed as a python package:
-
-#### Installing `cryo` python from pypi
-
-(make sure rust is installed first, see [rustup](https://www.rust-lang.org/tools/install))
+The `cryo` Python package is not published to PyPI; build it from source with [maturin](https://github.com/PyO3/maturin). It needs Python 3.10+ and a Rust toolchain:
 
 ```bash
-pip install maturin
-pip install cryo
-```
-
-#### Installing `cryo` python from source
-
-```bash
-pip install maturin
 git clone https://github.com/trial123Zel/cryo-ocd
 cd cryo-ocd/crates/python
+pip install maturin
 maturin build --release
-pip install --force-reinstall <OUTPUT_OF_MATURIN_BUILD>.whl
+pip install --force-reinstall <path-printed-by-maturin>.whl
 ```
+
+For pandas output (`output_format="pandas"`), also install the pandas extra: `pip install pandas pyarrow`.
 
 ## Data Schemas
 
