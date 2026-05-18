@@ -145,7 +145,7 @@ Standard types across tables:
 |State Diffs|1|multiple|`trace_replayBlockTransactions`|
 |Vm Traces|1|multiple|`trace_replayBlockTransactions`|
 
-`cryo` uses [alloy](https://github.com/alloy-rs/alloy) to perform JSON-RPC requests, so it can be used with any chain that exposes a standard Ethereum JSON-RPC endpoint. This includes Ethereum, Optimism, Arbitrum, Polygon, BNB, and Avalanche.
+`cryo` uses [alloy](https://github.com/alloy-rs/alloy) to perform JSON-RPC requests, and works with EVM chains that use standard Ethereum block and transaction formats — Ethereum, Polygon PoS, BNB Smart Chain, Avalanche C-Chain, and similar. **OP Stack chains (Optimism, Base) are not yet supported** — their per-block deposit transaction breaks block decoding; support is tracked as epic [#48](https://github.com/trial123Zel/cryo-ocd/issues/48), see [ADR-0006](./docs/adr/0006-op-stack-support.md).
 
 A future version of `cryo` will be able to bypass JSON-RPC and query node data directly.
 
