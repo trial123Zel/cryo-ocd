@@ -7,196 +7,163 @@ of record.
 
 ## How to read this
 
-- Work is grouped into **phases**, tracked as GitHub **milestones**.
-- Each **task** has an ID (`P1-3`, `H-2`) and becomes one GitHub **issue**.
-- Each task notes its **size** (S/M/L) and **dependencies**, then describes the
-  scope, **acceptance criteria**, a **validation** method, and **credit** for
-  any adopted upstream work.
+- Work is grouped into **phases**, each tracked as a GitHub **milestone**.
+- Every task has an ID — `P<phase>-<n>` for phase work, `H-<n>` for
+  housekeeping — and one tracking issue in this repo.
+- Each phase below is a single table with the same columns. Full scope,
+  acceptance criteria, and validation method live in each task's linked issue.
 - Only worthwhile community work is imported; the upstream tracker is not
   mirrored or adjudicated — see [ADR-0001](./docs/adr/0001-fork-charter.md).
 
-The merge gate for every code task: `cargo build` + `cargo test`,
-`clippy -Dwarnings`, `cargo fmt`, and the `cryo_test` data diff — all green.
+### Legend
+
+**Status** — ✅ Done · 🔄 In progress · ⬜ Not started · ⏸️ Deferred (blocked on infrastructure, awaiting a future phase)
+
+- **Issue** — the cryo-ocd issue tracking the task. GitHub shows it green when
+  open, purple when closed.
+- **Credit** — upstream
+  [`paradigmxyz/cryo`](https://github.com/paradigmxyz/cryo) issues and PRs,
+  cited as `cryo#NN`, with the original authors credited by handle per
+  [ADR-0001](./docs/adr/0001-fork-charter.md).
+- **★** — an **epic**: gets its own ADR and sub-issue breakdown when its
+  milestone opens.
+
+The merge gate for every code task: `cargo build`, `cargo test`,
+`clippy -D warnings`, `cargo fmt`, a secret scan, and the `LICENSE-*` guard all
+green; the `cryo_test` data diff runs as an advisory check.
 
 ## Phase overview
 
-| Phase | Milestone | Theme | Status |
-|-------|-----------|-------|--------|
-| 0 | Foundation & Governance | Scaffolding, governance, CI, secret handling | ✅ Complete |
-| 1 | Dependency Modernization | alloy 2.x, polars, pyo3, syn 2; retire clap_cryo | ✅ Complete |
-| 2 | Quick Bug Fixes | Small, well-understood fixes with reference patches | ✅ Complete |
-| 3 | Correctness Bugs | Data-correctness bugs needing node reproduction | ✅ Complete |
-| 4 | Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress |
+| Phase | Theme | Status | Tasks done |
+|-------|-------|--------|------------|
+| 0 — Foundation & Governance | Scaffolding, governance, CI, secret handling | ✅ Done | 10 / 10 |
+| 1 — Dependency Modernization | alloy 2.x, polars, pyo3, syn 2; retire clap_cryo | ✅ Done | 11 / 11 |
+| 2 — Quick Bug Fixes | Small, well-understood fixes with reference patches | ✅ Done | 9 / 9 |
+| 3 — Correctness Bugs | Data-correctness bugs needing node reproduction | ✅ Done | 6 / 6 |
+| 4 — Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress | 8 / 18 |
+| Housekeeping | Low-risk maintenance, batched across phases | ✅ Done | 6 / 6 |
+| Deferred | Items blocked on infrastructure, awaiting a future phase | ⏸️ Deferred | 0 / 2 |
 
-Housekeeping tasks (`H-*`) are low-risk and batched alongside other phases.
-
-**Status snapshot (2026-05-18).** Phases 0–2 are complete, with their
-milestones closed. Phase 3 is complete bar `#37` / `P3-2`
-(`address_appearances` on Erigon-3 archive nodes, pending re-verification).
-Phase 4 is in progress: `P4-1`–`P4-5`, `P4-9`, and `P4-15` are merged, and
+**Status snapshot (2026-05-18).** Phases 0–2 are complete with their milestones
+closed, and Phase 3's correctness fixes are all merged. Phase 4 is in progress:
 **`v0.4.0` — cryo-ocd's first release — has shipped**, with prebuilt binaries
-and a Docker image published by the `release` workflow. Per-task status is
-shown in the Phase 4 table below — ✅ done, 🔄 in progress, blank = not
-started.
+and a Docker image published by the `release` workflow. Two tasks — `P3-2` and
+`P4-12` — are **deferred**: both need an Erigon archive node to verify, and are
+parked for a future phase (see [Deferred](#deferred)). 50 of 62 tracked tasks
+are complete overall.
 
 ---
 
 ## Phase 0 — Foundation & Governance
 
-Delivered as a scaffolding pull request plus repo-configuration actions. Branch
-protection and the merge-on-green policy switch on at the end of the phase, so
-`P0-9` is the first PR through the full pipeline.
+Scaffolding, governance, CI, and secret handling. Branch protection and
+merge-on-green switch on at the end of the phase, so `P0-9` is the first PR
+through the full pipeline.
 
-**P0-1 — Governance & licensing docs.** *S.* `NOTICE`, README fork banner,
-`ACKNOWLEDGEMENTS.md`, refreshed `CONTRIBUTING.md`, `CHANGELOG.md`. `LICENSE-*`
-left byte-for-byte unchanged.
-
-**P0-2 — Architecture Decision Records.** *S.* `docs/adr/` with a template and
-ADR-0001…0005.
-
-**P0-3 — Issue & PR templates.** *S.* Implementation-task issue form, refreshed
-bug/feature templates, updated PR template.
-
-**P0-4 — Labels & milestones.** *S.* Label namespaces and Phase 0–4 milestones;
-GitHub Issues enabled. *(Completed during Phase 0 setup.)*
-
-**P0-5 — Secret handling & .env convention.** *S.* `.env.example`, `.gitignore`
-confirmation, CI secret-scanning.
-
-**P0-6 — CI overhaul & runner lockdown.** *M.* Keep build/test, clippy, fmt; add
-the self-hosted `cryo_test` job with actor + same-repo-branch gating; add a
-secret scan and a `LICENSE-*` change guard.
-
-**P0-7 — ROADMAP.md.** *S.* This document.
-
-**P0-8 — cryo_test portability fix.** *S.* Remove the hard-coded path and build
-commit from the `cryo_test` example scripts; read `RETH_RPC_URL` from `.env`.
-
-**P0-9 — Branch protection + warm-up PR.** *S, depends P0-1…P0-8.* Enable branch
-protection and merge-on-green; run the `H-3` typo batch as the pipeline
-shakedown.
-
-**P0-10 — Import triaged backlog as issues.** *M, depends P0-3.* Create one
-GitHub issue per roadmap task below.
+| Task | Status | Summary | Issue | Credit |
+|------|--------|---------|-------|--------|
+| P0-1 | ✅ Done | Governance & licensing docs — `NOTICE`, README fork banner, `ACKNOWLEDGEMENTS.md`, `CONTRIBUTING.md`, `CHANGELOG.md`; `LICENSE-*` left byte-for-byte unchanged | #1 | — |
+| P0-2 | ✅ Done | Architecture Decision Records — `docs/adr/` with a template and ADR-0001…0005 | #2 | — |
+| P0-3 | ✅ Done | Issue & PR templates — implementation-task form, refreshed bug/feature templates | #3 | — |
+| P0-4 | ✅ Done | Label namespaces and Phase 0–4 milestones; GitHub Issues enabled | #4 | — |
+| P0-5 | ✅ Done | Secret handling & `.env` convention — `.env.example`, `.gitignore`, CI secret-scanning | #5 | — |
+| P0-6 | ✅ Done | CI overhaul & runner lockdown — build/test, clippy, fmt, secret scan, `LICENSE-*` guard, gated `cryo_test` job | #6 | — |
+| P0-7 | ✅ Done | This roadmap document | #7 | — |
+| P0-8 | ✅ Done | `cryo_test` portability fix — drop the hard-coded path/commit, read `RETH_RPC_URL` from `.env` | #8 | — |
+| P0-9 | ✅ Done | Branch protection + warm-up PR — enable merge-on-green, shaken down by the `H-3` typo batch | #9 | — |
+| P0-10 | ✅ Done | Import the triaged backlog as one GitHub issue per roadmap task | #10 | — |
 
 ---
 
 ## Phase 1 — Dependency Modernization
 
 The keystone. A dependency migration cannot compile in intermediate states, so
-`P1-1`…`P1-7` land as a structured sequence of commits on a `phase-1-deps`
-integration branch; the single `phase-1-deps` → `main` pull request (`P1-10`)
-is the review point and the only one gated green by CI and the `cryo_test`
-baseline diff. `P1-8` is independent. Primary reference: upstream PR #244
-(`@clouds56`); cross-check: PR #240 (`@mattsse`). See
-[ADR-0002](./docs/adr/0002-dependency-modernization.md).
+`P1-1`–`P1-7` landed as one ordered commit sequence on a `phase-1-deps`
+integration branch behind a single review PR (`P1-10`); `P1-8` is independent.
+Primary reference: upstream PR `cryo#244` (@clouds56); cross-check `cryo#240`
+(@mattsse). See [ADR-0002](./docs/adr/0002-dependency-modernization.md).
 
-**P1-0 — Golden baseline capture.** *S.* Archive `cryo_test` output from current
-`main` across all datatypes as the regression baseline.
-
-**P1-1 — alloy: provider/source layer.** *M, depends P1-0.* Migrate
-`types/sources.rs`, `types/rpc_params.rs` to alloy 2.x.
-
-**P1-2 — alloy: primitive & RPC-type fixes.** *M, depends P1-1.* The ~40 dataset
-files that only use primitive/RPC types.
-
-**P1-3 — alloy: trace-type datasets.** *L, depends P1-1.* `traces`,
-`trace_calls`, `contracts`, `storage_diffs`, `code_diffs`, `balance_diffs`,
-`vm_traces`, `geth_*`.
-
-**P1-4 — alloy: to_df macro & python crate.** *M, depends P1-2/P1-3.*
-
-**P1-5 — polars 0.38 → current.** *L.* Schema/series API; `with_series!` →
-`with_column` rename.
-
-**P1-6 — syn 1 → 2 in to_df.** *M.* The procedural-macro crate.
-
-**P1-7 — pyo3 / pyo3-polars / pyo3-asyncio upgrade.** *M, depends P1-4.*
-
-**P1-8 — Retire clap_cryo → mainline clap.** *M, independent.* See
-[ADR-0003](./docs/adr/0003-retire-clap-cryo.md).
-
-**P1-9 — Cargo.lock hygiene.** *S.* Dedup crates, resolve yanked deps.
-Resurrects upstream PRs #225 and #217.
-
-**P1-10 — Full validation & version bump.** *M, depends all.* `cryo_test`
-all-datatype diff vs the `P1-0` baseline; update `CHANGELOG.md`; bump version;
-merge `phase-1-deps` → `main`. Closes upstream issue #239.
+| Task | Status | Summary | Issue | Credit |
+|------|--------|---------|-------|--------|
+| P1-0 | ✅ Done | Golden baseline capture — archive `cryo_test` output from `main` across all datatypes as the regression baseline | #16 | — |
+| P1-1 | ✅ Done | alloy 2.x — provider/source layer (`types/sources.rs`, `types/rpc_params.rs`) | #17 | — |
+| P1-2 | ✅ Done | alloy 2.x — primitive & RPC-type fixes across the ~40 dataset files | #18 | — |
+| P1-3 | ✅ Done | alloy 2.x — trace-type datasets (`traces`, `trace_calls`, `contracts`, `*_diffs`, `vm_traces`, `geth_*`) | #19 | — |
+| P1-4 | ✅ Done | alloy 2.x — `to_df` macro & python crate | #20 | — |
+| P1-5 | ✅ Done | polars 0.38 → current — schema/series API migration | #21 | — |
+| P1-6 | ✅ Done | syn 1 → 2 in the `to_df` procedural-macro crate | #22 | — |
+| P1-7 | ✅ Done | pyo3 / pyo3-polars / pyo3-asyncio upgrade | #23 | — |
+| P1-8 | ✅ Done | Retire the clap_cryo fork for mainline clap — see [ADR-0003](./docs/adr/0003-retire-clap-cryo.md) | #24 | — |
+| P1-9 | ✅ Done | Cargo.lock hygiene — dedup crates, resolve yanked deps | #25 | `cryo#225`, `cryo#217` |
+| P1-10 | ✅ Done | Full validation & version bump — all-datatype `cryo_test` diff vs the `P1-0` baseline | #26 | `cryo#239` |
 
 ---
 
 ## Phase 2 — Quick Bug Fixes
 
-Each task is one small PR with a regression test and a `cryo_test` diff for the
-affected datatype. Mostly parallelizable. Several upstream contributors
-submitted overlapping patches; cryo-ocd re-implements from the issue, validates,
-and credits the original reporter and any genuinely-used diff.
+Small, well-understood fixes — each one PR with a regression test and a
+`cryo_test` diff for the affected datatype. Several upstream contributors
+submitted overlapping patches; cryo-ocd re-implements from the issue,
+validates, and credits the original reporter.
 
-| Task | Fix | Files | Upstream / credit |
-|------|-----|-------|-------------------|
-| P2-1 | erc20_transfers uses the Approval signature instead of Transfer | `datasets/erc20_transfers.rs` | issue #231, PR #233 (@ChadRosseau) |
-| P2-2 | erc721_transfers contract column misnamed `erc20` | `datasets/erc721_transfers.rs` | issue #230, PR #232 (@ChadRosseau) |
-| P2-3 | geth_state_diffs wrong `to_value` when post-state absent | `multi_datasets/geth_state_diffs.rs` | issue #245, PR #251 |
-| P2-4 | "could not generate FixedBytes column" on empty result | `to_df/src/lib.rs` | issue #238, PR #254 |
-| P2-5 | excluding a `default_sort` column zeroes output | `types/dataframes/sort.rs` | issue #221, PR #253 |
-| P2-6 | reorg-buffer drops the partial tail chunk | `cli/src/parse/blocks.rs` | issue #193, PR #255 |
-| P2-7 | u32 overflow on large trace gas values | `datasets/traces.rs`, `trace_calls.rs` | issue #173, PR #256 |
-| P2-8 | divide-by-zero in summaries with `--align` | `types/summaries.rs` | issues #150, #125, PR #258 |
-| P2-9 | contracts `init_code_hash` / `code_hash` swapped | `datasets/contracts.rs` | PR #249 |
+| Task | Status | Summary | Issue | Credit |
+|------|--------|---------|-------|--------|
+| P2-1 | ✅ Done | `erc20_transfers` matched the Approval signature instead of Transfer | #27 | `cryo#231`, `cryo#233` (@ChadRosseau) |
+| P2-2 | ✅ Done | `erc721_transfers` contract column misnamed `erc20` | #28 | `cryo#230`, `cryo#232` (@ChadRosseau) |
+| P2-3 | ✅ Done | `geth_state_diffs` wrong `to_value` when post-state is absent | #29 | `cryo#245`, `cryo#251` |
+| P2-4 | ✅ Done | "could not generate FixedBytes column" on an empty result | #30 | `cryo#238`, `cryo#254` |
+| P2-5 | ✅ Done | Excluding a `default_sort` column zeroed the output | #31 | `cryo#221`, `cryo#253` |
+| P2-6 | ✅ Done | Reorg-buffer dropped the partial tail chunk | #32 | `cryo#193`, `cryo#255` |
+| P2-7 | ✅ Done | u32 overflow on large trace gas values | #33 | `cryo#173`, `cryo#256` |
+| P2-8 | ✅ Done | Divide-by-zero in collection summaries with `--align` | #34 | `cryo#150`, `cryo#125`, `cryo#258` |
+| P2-9 | ✅ Done | `contracts` `init_code_hash` / `code_hash` swapped | #35 | `cryo#249` |
 
 ---
 
 ## Phase 3 — Correctness Bugs
 
-Each task: reproduce against a live node, root-cause, fix, validate.
-Parallelizable. `P3-2` and `P3-5` may be resolved incidentally by Phase 1 —
-re-verify before doing separate work.
+Data-correctness bugs that need live-node reproduction: reproduce, root-cause,
+fix, validate.
 
-| Task | Bug | Upstream |
-|------|-----|----------|
-| P3-1 | `balances` returns pre-execution balances (silent corruption) | issue #154 |
-| P3-2 | `address_appearances` fails on Erigon-3 archive nodes | issue #224 |
-| P3-3 | reth `contracts` from block 0 always fails | issue #151 |
-| P3-4 | `--txs` empty-result / empty-chunk panic | issues #49, #26 |
-| P3-5 | `polars-arrow` compile failure | issue #63 |
-| P3-6 | Poetry build fails (`GIT_DESCRIPTION` unset) | issue #61 |
-| P3-7 | pip install does not require `pyarrow` | issue #137 |
+| Task | Status | Summary | Issue | Credit |
+|------|--------|---------|-------|--------|
+| P3-1 | ✅ Done | `balances` returned pre-execution balances (silent corruption) | #36 | `cryo#154` |
+| P3-3 | ✅ Done | reth `contracts` from block 0 always failed | #38 | `cryo#151` |
+| P3-4 | ✅ Done | `--txs` empty-result / empty-chunk panic | #39 | `cryo#49`, `cryo#26` |
+| P3-5 | ✅ Done | `polars-arrow` compile failure | #40 | `cryo#63` |
+| P3-6 | ✅ Done | Poetry build fails when `GIT_DESCRIPTION` is unset | #41 | `cryo#61` |
+| P3-7 | ✅ Done | pip install did not require `pyarrow` | #42 | `cryo#137` |
+
+Phase 3's seventh task, `P3-2`, has been **deferred** — it can only be verified
+on an Erigon archive node. See [Deferred](#deferred).
 
 ---
 
 ## Phase 4 — Features & Enhancements
 
-In-scope enhancements from the community backlog. The four epics (★) get their
-own ADR and sub-issue breakdown when their milestone opens.
+In-scope enhancements from the community backlog. Epics (★) get their own ADR
+and sub-issue breakdown when their milestone opens.
 
-| Task | Feature | Upstream / credit | Status |
-|------|---------|-------------------|--------|
-| P4-1 | EIP-4844 block fields (`blob_gas_used`, `excess_blob_gas`) | PR #181 (@peyha) | ✅ Done |
-| P4-2 | Transaction deploy/contract address column | PR #215 (@sslivkoff), #189 (@LatentSpaceExplorer) | ✅ Done |
-| P4-3 | Raw transaction column | PR #180 (@0xMelkor) | ✅ Done |
-| P4-4 | `--to/--from-address` filtering for more datasets | issue #97 | ✅ Done |
-| P4-5 | `transaction_count` column on blocks | upstream PR #223 | ✅ Done |
-| P4-6 ★ | OP Stack chain support (epic) | issue #155, ADR-0006 | |
-| P4-7 | WebSocket support | issue #65 | |
-| P4-8 ★ | `--function-signature` filtering + calldata decoding for `txs` | issue #140, PRs #145 (@cool-mestorf), #149 (@DoTheBestToGetTheBest) | |
-| P4-9 | Event decoding: u256 handling, empty-result datatypes, schema-summary display | issues #56, #184 | ✅ Done |
-| P4-10 | Multiple RPC providers + graceful rate-limiting | issues #132, #5 | |
-| P4-11 | Incremental dataset consolidation | issue #29 | |
-| P4-12 | `erigon_getHeaderByNumber` batch perf | issue #35 | |
-| P4-13 ★ | Cloud/S3 sink via a generalized `Sink` trait | issue #47, PR #92 (@sslivkoff) | |
-| P4-14 ★ | Direct Reth DB access, bypassing JSON-RPC | issues #3, #156, upstream PR #163 | |
-| P4-15 | Release binaries via CI + Dockerfile | issue #229, PR #40 (@distributedstatemachine) | ✅ Done |
-| P4-16 | Python docs, API docstrings, install-instruction fixes | issues #205, #178, PRs #186 (@peyha), #169 (@0xstubbs) | |
-| P4-17 | Array & tuple support in log/event decoding (candidate epic) | issue #79, upstream #184 | |
-| P4-18 | Progress bar for the Python CLI | issue #178 | |
-
-`P4-17` was broken out of `P4-9` during scope review: array/tuple decoding is
-design-heavy — nested type representation and the interaction with cryo's u256
-multi-representation — and may warrant its own ADR and sub-issue breakdown if
-pursued as an epic. See [#79](https://github.com/trial123Zel/cryo-ocd/issues/79).
-
-`P4-18` (Python-CLI progress bar) was split out of `P4-16` during the docs
-review; `P4-16`'s notebook-example sub-task was dropped as out of scope.
+| Task | Status | Summary | Issue | Credit |
+|------|--------|---------|-------|--------|
+| P4-1 | ✅ Done | EIP-4844 block fields (`blob_gas_used`, `excess_blob_gas`) | #43 | `cryo#181` (@peyha) |
+| P4-2 | ✅ Done | Transaction deployed-contract-address column | #44 | `cryo#215` (@sslivkoff), `cryo#189` (@LatentSpaceExplorer) |
+| P4-3 | ✅ Done | Raw (EIP-2718-encoded) transaction column | #45 | `cryo#180` (@0xMelkor) |
+| P4-4 | ✅ Done | `--to`/`--from-address` filtering for more datasets | #46 | `cryo#97` |
+| P4-5 | ✅ Done | `transaction_count` column on the blocks dataset | #47 | `cryo#223` |
+| P4-6 ★ | ⬜ Not started | OP Stack chain support (epic) | #48 | `cryo#155`; [ADR-0006](./docs/adr/0006-op-stack-support.md) |
+| P4-7 | ⬜ Not started | WebSocket (`--ws`) support | #49 | `cryo#65` |
+| P4-8 ★ | ⬜ Not started | `--function-signature` filtering + calldata decoding for `txs` | #50 | `cryo#140`, `cryo#145` (@cool-mestorf), `cryo#149` (@DoTheBestToGetTheBest) |
+| P4-9 | ✅ Done | Event decoding — u256 handling, empty-result datatypes, schema-summary display | #51 | `cryo#56`, `cryo#184` |
+| P4-10 | ⬜ Not started | Multiple RPC providers + graceful rate-limiting | #52 | `cryo#132`, `cryo#5` |
+| P4-11 | ⬜ Not started | Incremental dataset consolidation | #53 | `cryo#29` |
+| P4-13 ★ | ⬜ Not started | Cloud/S3 sink via a generalized `Sink` trait | #55 | `cryo#47`, `cryo#92` (@sslivkoff) |
+| P4-14 ★ | ⬜ Not started | Direct Reth DB access, bypassing JSON-RPC | #56 | `cryo#3`, `cryo#156`, `cryo#163` |
+| P4-15 | ✅ Done | Release binaries via CI + Dockerfile | #57 | `cryo#229`, `cryo#40` (@distributedstatemachine) |
+| P4-16 | ✅ Done | Python docs, API docstrings, install-instruction fixes | #58 | `cryo#205`, `cryo#178`, `cryo#186` (@peyha), `cryo#169` (@0xstubbs) |
+| P4-17 | ⬜ Not started | Array & tuple support in log/event decoding (candidate epic) | #79 | `cryo#184` |
+| P4-18 | ⬜ Not started | Progress bar for the Python CLI | #101 | `cryo#178` |
+| P4-19 | ⬜ Not started | mdBook (`book/`) fork-staleness review | #100 | — |
 
 `P4-6` was re-scoped from "OP Stack receipt fields" to an epic during
 verification: cryo cannot deserialise OP Stack blocks at all — the per-block
@@ -204,23 +171,55 @@ deposit transaction (type `0x7e`) is absent from alloy's Ethereum types. Full
 OP Stack support needs `op-alloy` integration; see
 [ADR-0006](./docs/adr/0006-op-stack-support.md). Sidelined for now.
 
+`P4-17` was broken out of `P4-9` during scope review: array/tuple decoding is
+design-heavy — nested type representation and the interaction with cryo's u256
+multi-representation — and may warrant its own ADR if pursued as an epic.
+
+`P4-18` and `P4-19` were split out of `P4-16` during the docs review — the
+Python-CLI progress bar, and a fork-staleness pass over the rest of the mdBook
+(`book/`) beyond the install and Python pages already refreshed there. `P4-16`'s
+notebook-example sub-task was dropped as out of scope.
+
+`P4-12` (`erigon_getHeaderByNumber` fast-path) has been **deferred** — it needs
+an Erigon node to test. See [Deferred](#deferred).
+
+---
+
+## Deferred
+
+Two tasks are deferred to a future, not-yet-scheduled phase. Both can only be
+verified against an **Erigon archive node**, and the project's CI runner uses
+Reth — so neither can be tested today. They will be scheduled once an Erigon
+archive node is available.
+
+| Task | Status | Summary | Issue | Credit |
+|------|--------|---------|-------|--------|
+| P3-2 | ⏸️ Deferred | `address_appearances` fails on Erigon-3 archive nodes | #37 | `cryo#224` |
+| P4-12 | ⏸️ Deferred | `erigon_getHeaderByNumber` batch fast-path | #54 | `cryo#35` |
+
+`P3-2` is very likely already fixed by the alloy 2.x migration (Phase 1) but
+needs confirmation on a real Erigon-3 node. `P4-12` is an Erigon-specific
+performance path that cannot be exercised — or benchmarked — without one. Both
+keep their original phase IDs; only their scheduling has moved.
+
 ---
 
 ## Housekeeping
 
-Low-risk, batched.
+Low-risk maintenance, batched alongside the phases.
 
-| Task | Work | Upstream / credit |
-|------|------|-------------------|
-| H-1 | CI action version bumps | PRs #241 (@PixelPil0t1), #242 (@Daulox92) |
-| H-2 | Modernize `std::io::Error` construction in `build.rs` | PR #234 (@strmfos) |
-| H-3 | Typo / docs batch — the Phase 0 warm-up PR | PRs #220 (@sunxunle), #226 (@Hopium21), #235 (@0xAlexKorn), #237 (@solanaXpeter) |
-| H-4 | Full `clippy` pass (after Phase 1) | PR #246 (@bh2smith) |
-| H-5 | Repo-maintenance refresh ahead of the release candidate | — |
-| H-6 | Bump GitHub Actions off the retiring Node 20 runtime | — |
+| Task | Status | Summary | Issue | Credit |
+|------|--------|---------|-------|--------|
+| H-1 | ✅ Done | Bump and full-SHA-pin GitHub Actions | #59 | `cryo#241` (@PixelPil0t1), `cryo#242` (@Daulox92) |
+| H-2 | ✅ Done | Modernize `std::io::Error` construction in `build.rs` | #14 | `cryo#234` (@strmfos) |
+| H-3 | ✅ Done | Typo / docs batch — the Phase 0 warm-up PR | #12 | `cryo#220` (@sunxunle), `cryo#226` (@Hopium21), `cryo#235` (@0xAlexKorn), `cryo#237` (@solanaXpeter) |
+| H-4 | ✅ Done | Full `clippy` pass and Rust toolchain pin | #15 | `cryo#246` (@bh2smith) |
+| H-5 | ✅ Done | Repo-maintenance refresh ahead of the release candidate | #87 | — |
+| H-6 | ✅ Done | Bump GitHub Actions off the retiring Node 20 runtime | #93 | — |
 
 ---
 
-*Upstream issue and PR numbers refer to
-[`paradigmxyz/cryo`](https://github.com/paradigmxyz/cryo). Adopted work preserves
-original authorship per [ADR-0001](./docs/adr/0001-fork-charter.md).*
+Task IDs map to GitHub issues in this repo (the **Issue** column). Upstream
+references (`cryo#NN`) point to
+[`paradigmxyz/cryo`](https://github.com/paradigmxyz/cryo); adopted work
+preserves original authorship per [ADR-0001](./docs/adr/0001-fork-charter.md).
