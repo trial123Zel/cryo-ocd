@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "cryo"
 description = "cryo is the easiest way to extract blockchain data to parquet, csv, json, or a python dataframe."
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",

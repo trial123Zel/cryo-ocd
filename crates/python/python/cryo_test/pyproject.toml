@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "cryo_test"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 dynamic = ["version", "description"]
 license = {text = "MIT OR Apache-2.0"}
 classifiers = [
@@ -19,9 +19,6 @@ classifiers = [
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -50,7 +47,7 @@ pytest = "^7.0.0"
 pytest-asyncio = "^0.18.3"  # Add this line for pytest-asyncio
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 strict = true
 implicit_reexport = true
 files = ["cryo_test"]

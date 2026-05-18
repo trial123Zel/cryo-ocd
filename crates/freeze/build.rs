@@ -1,8 +1,15 @@
 use std::process::Command;
 
 fn main() {
-    let git_description =
-        get_git_description().unwrap_or_else(|_| env!("CARGO_PKG_VERSION").to_string());
+    // The release workflow sets CRYO_VERSION explicitly when building the
+    // Docker image (its build context has no .git). Otherwise derive the
+    // version from git, then fall back to the Cargo.toml version.
+    println!("cargo:rerun-if-env-changed=CRYO_VERSION");
+    let git_description = std::env::var("CRYO_VERSION")
+        .ok()
+        .filter(|v| !v.is_empty())
+        .or_else(|| get_git_description().ok())
+        .unwrap_or_else(|| env!("CARGO_PKG_VERSION").to_string());
 
     println!("cargo:rustc-env=GIT_DESCRIPTION={}", git_description);
 }
