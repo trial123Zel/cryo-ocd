@@ -67,6 +67,14 @@ originates from an upstream contribution.
   current versions, for supply-chain safety. Adopts the intent of
   upstream PRs paradigmxyz/cryo#241 (@PixelPil0t1) and #242
   (@Daulox92). (#59)
+- The `python-release` workflow migrated to `upload-artifact` /
+  `download-artifact` v4, the v3 actions being end-of-life: each build
+  job now uploads a uniquely-named artifact and the release job
+  collects them with `pattern` + `merge-multiple`. Its pull-request
+  trigger — which named a misspelled file and so never ran — is fixed,
+  and Python 3.7, unsupported since the Phase 1 `pyo3` 0.27 upgrade, is
+  dropped from the build matrix, with `crates/python`'s
+  `requires-python` raised to `>=3.8`. (#60)
 - Renamed the `erc721_transfers` contract-address column from `erc20`
   to `erc721`; the name had been copied verbatim from the
   `erc20_transfers` dataset. Reported by @ChadRosseau in
