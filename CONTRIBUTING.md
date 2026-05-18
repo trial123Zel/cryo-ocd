@@ -70,13 +70,30 @@ courtesy.
 
 ## The CI gate
 
-A pull request is mergeable when CI is green:
+A pull request is mergeable when the **required** checks are green:
 
 1. `cargo build` + `cargo test` (workspace)
 2. `cargo clippy` with `-D warnings`
 3. `cargo fmt --check`
 4. Secret scan
-5. `cryo_test` data validation (self-hosted runner; see ADR-0004)
+5. `LICENSE-*` files unchanged
+
+The `cryo_test` data-validation job (self-hosted runner; see ADR-0004) also
+runs on every pull request, but is **advisory, not required**: an intended
+schema change makes it report a diff, so it is reviewed rather than gated on.
+
+## Releasing
+
+Releases are cut by pushing a Git tag:
+
+- Tag `vX.Y.Z` on `main` (e.g. `v0.4.0`). The `release` workflow builds the
+  `cryo` binaries (Linux and Windows x86_64, macOS arm64) and the Docker
+  image, then publishes a GitHub Release with the archives attached.
+- A tag with a SemVer pre-release suffix — e.g. `v0.4.0-rc.1` — is published
+  automatically as a pre-release.
+- Before tagging a final release, promote `CHANGELOG.md`: rename `[Unreleased]`
+  to `[X.Y.Z] - <date>` and open a fresh empty `[Unreleased]`.
+- `Cargo.toml`'s workspace version should already match the tag.
 
 ## Licensing
 

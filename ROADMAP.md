@@ -30,14 +30,14 @@ The merge gate for every code task: `cargo build` + `cargo test`,
 
 Housekeeping tasks (`H-*`) are low-risk and batched alongside other phases.
 
-**Status snapshot (2026-05-17).** Phases 0–3 are complete: the dependency
-migration, the quick-fix batch, and the correctness-bug batch have all landed.
-Two minor follow-ups remain open against their milestones — `#60` (migrate
-`python_release.yml` to `upload-artifact` / `download-artifact` v4) and `#37` /
-`P3-2` (`address_appearances` on Erigon-3 archive nodes, pending
-re-verification). Phase 4 is in progress: `P4-1`–`P4-5`, `P4-9`, and `P4-15`
-are merged. Per-task status is shown in the Phase 4 table below — ✅ done,
-🔄 in progress, blank = not started.
+**Status snapshot (2026-05-18).** Phases 0–2 are complete, with their
+milestones closed. Phase 3 is complete bar `#37` / `P3-2`
+(`address_appearances` on Erigon-3 archive nodes, pending re-verification).
+Phase 4 is in progress: `P4-1`–`P4-5`, `P4-9`, and `P4-15` are merged, and
+**`v0.4.0` — cryo-ocd's first release — has shipped**, with prebuilt binaries
+and a Docker image published by the `release` workflow. Per-task status is
+shown in the Phase 4 table below — ✅ done, 🔄 in progress, blank = not
+started.
 
 ---
 
@@ -207,6 +207,7 @@ Low-risk, batched.
 | H-3 | Typo / docs batch — the Phase 0 warm-up PR | PRs #220 (@sunxunle), #226 (@Hopium21), #235 (@0xAlexKorn), #237 (@solanaXpeter) |
 | H-4 | Full `clippy` pass (after Phase 1) | PR #246 (@bh2smith) |
 | H-5 | Repo-maintenance refresh ahead of the release candidate | — |
+| H-6 | Bump GitHub Actions off the retiring Node 20 runtime | — |
 
 ---
 
