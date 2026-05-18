@@ -1,4 +1,4 @@
-use crate::*;
+use crate::{sources::OpReceiptFields, *};
 use alloy::{
     consensus::Transaction as ConsensusTransaction,
     eips::eip2718::Encodable2718,
@@ -41,6 +41,10 @@ pub struct Transactions {
     s: Vec<Vec<u8>>,
     v: Vec<bool>,
     raw: Vec<Vec<u8>>,
+    l1_fee: Vec<Option<u64>>,
+    l1_gas_used: Vec<Option<u64>>,
+    l1_gas_price: Vec<Option<u64>>,
+    l1_fee_scalar: Vec<Option<String>>,
 }
 
 #[async_trait::async_trait]
@@ -83,7 +87,7 @@ pub type TransactionAndReceipt = (Transaction, Option<TransactionReceipt>);
 
 #[async_trait::async_trait]
 impl CollectByBlock for Transactions {
-    type Response = (Block, Vec<TransactionAndReceipt>, bool);
+    type Response = (Block, Vec<TransactionAndReceipt>, Vec<OpReceiptFields>, bool);
 
     async fn extract(request: Params, source: Arc<Source>, query: Arc<Query>) -> R<Self::Response> {
         let block = source
@@ -139,18 +143,31 @@ impl CollectByBlock for Transactions {
             vec![None; block.transactions.len()]
         };
 
+        // OP Stack chains attach L1-fee fields to receipts; fetch them when an
+        // l1_* column is requested (the receipts above don't carry them).
+        let op_fields = if schema.has_column("l1_fee") |
+            schema.has_column("l1_gas_used") |
+            schema.has_column("l1_gas_price") |
+            schema.has_column("l1_fee_scalar")
+        {
+            source.get_op_receipt_fields(&transactions).await?
+        } else {
+            vec![OpReceiptFields::default(); transactions.len()]
+        };
+
         let transactions_with_receipts = transactions.into_iter().zip(receipts).collect();
-        Ok((block, transactions_with_receipts, query.exclude_failed))
+        Ok((block, transactions_with_receipts, op_fields, query.exclude_failed))
     }
 
     fn transform(response: Self::Response, columns: &mut Self, query: &Arc<Query>) -> R<()> {
         let schema = query.schemas.get_schema(&Datatype::Transactions)?;
-        let (block, transactions_with_receipts, exclude_failed) = response;
-        for (tx, receipt) in transactions_with_receipts.into_iter() {
+        let (block, transactions_with_receipts, op_fields, exclude_failed) = response;
+        for ((tx, receipt), op) in transactions_with_receipts.into_iter().zip(op_fields) {
             let gas_price = get_gas_price(&block, &tx);
             process_transaction(
                 tx,
                 receipt,
+                op,
                 columns,
                 schema,
                 exclude_failed,
@@ -164,7 +181,7 @@ impl CollectByBlock for Transactions {
 
 #[async_trait::async_trait]
 impl CollectByTransaction for Transactions {
-    type Response = (TransactionAndReceipt, Block, bool, u32);
+    type Response = (TransactionAndReceipt, OpReceiptFields, Block, bool, u32);
 
     async fn extract(request: Params, source: Arc<Source>, query: Arc<Query>) -> R<Self::Response> {
         let tx_hash = request.ethers_transaction_hash()?;
@@ -179,6 +196,21 @@ impl CollectByTransaction for Transactions {
             None
         };
 
+        let op_fields = if schema.has_column("l1_fee") |
+            schema.has_column("l1_gas_used") |
+            schema.has_column("l1_gas_price") |
+            schema.has_column("l1_fee_scalar")
+        {
+            source
+                .get_op_receipt_fields(std::slice::from_ref(&transaction))
+                .await?
+                .into_iter()
+                .next()
+                .unwrap_or_default()
+        } else {
+            OpReceiptFields::default()
+        };
+
         let block_number = transaction
             .block_number
             .ok_or(CollectError::CollectError("no block number for tx".to_string()))?;
@@ -190,16 +222,17 @@ impl CollectByTransaction for Transactions {
 
         let timestamp = block.header.timestamp as u32;
 
-        Ok(((transaction, receipt), block, query.exclude_failed, timestamp))
+        Ok(((transaction, receipt), op_fields, block, query.exclude_failed, timestamp))
     }
 
     fn transform(response: Self::Response, columns: &mut Self, query: &Arc<Query>) -> R<()> {
         let schema = query.schemas.get_schema(&Datatype::Transactions)?;
-        let ((transaction, receipt), block, exclude_failed, timestamp) = response;
+        let ((transaction, receipt), op_fields, block, exclude_failed, timestamp) = response;
         let gas_price = get_gas_price(&block, &transaction);
         process_transaction(
             transaction,
             receipt,
+            op_fields,
             columns,
             schema,
             exclude_failed,
@@ -210,9 +243,11 @@ impl CollectByTransaction for Transactions {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn process_transaction(
     tx: Transaction,
     receipt: Option<TransactionReceipt>,
+    op_fields: OpReceiptFields,
     columns: &mut Transactions,
     schema: &Table,
     exclude_failed: bool,
@@ -287,6 +322,17 @@ pub(crate) fn process_transaction(
     // the EIP-2718-encoded transaction (the canonical "raw" transaction)
     store!(schema, columns, raw, tx.inner.encoded_2718());
 
+    // OP Stack L1-fee receipt fields (all None on non-OP chains)
+    store!(schema, columns, l1_fee, op_fields.l1_fee.and_then(|v| u64::try_from(v).ok()));
+    store!(schema, columns, l1_gas_used, op_fields.l1_gas_used.and_then(|v| u64::try_from(v).ok()));
+    store!(
+        schema,
+        columns,
+        l1_gas_price,
+        op_fields.l1_gas_price.and_then(|v| u64::try_from(v).ok())
+    );
+    store!(schema, columns, l1_fee_scalar, op_fields.l1_fee_scalar);
+
     Ok(())
 }
 
@@ -347,5 +393,15 @@ mod tests {
         // P4-2 (#44): the deployed-contract-address column.
         let columns = Transactions::column_types();
         assert_eq!(columns.get("deploy_address"), Some(&ColumnType::Binary));
+    }
+
+    #[test]
+    fn transactions_has_op_stack_columns() {
+        // P4-6 (#48): OP Stack L1-fee receipt fields.
+        let columns = Transactions::column_types();
+        assert_eq!(columns.get("l1_fee"), Some(&ColumnType::UInt64));
+        assert_eq!(columns.get("l1_gas_used"), Some(&ColumnType::UInt64));
+        assert_eq!(columns.get("l1_gas_price"), Some(&ColumnType::UInt64));
+        assert_eq!(columns.get("l1_fee_scalar"), Some(&ColumnType::String));
     }
 }

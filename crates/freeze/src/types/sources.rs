@@ -60,6 +60,24 @@ pub struct Source {
     pub labels: SourceLabels,
 }
 
+/// OP Stack L1-fee fields attached to a transaction receipt.
+///
+/// These are OP-Stack-specific receipt extensions that alloy's typed Ethereum
+/// `TransactionReceipt` does not capture. Every field is `None` on non-OP
+/// chains (and `l1_fee_scalar` is `None` on post-Ecotone OP blocks).
+#[derive(Clone, Debug, Default, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct OpReceiptFields {
+    /// the L1 data fee, in wei
+    pub l1_fee: Option<U256>,
+    /// L1 gas used to post the transaction's data
+    pub l1_gas_used: Option<U256>,
+    /// the L1 gas price applied
+    pub l1_gas_price: Option<U256>,
+    /// the L1 fee scalar (pre-Ecotone only)
+    pub l1_fee_scalar: Option<String>,
+}
+
 impl Source {
     /// Returns all receipts for a block.
     /// Tries to use `eth_getBlockReceipts` first, and falls back to `eth_getTransactionReceipt`
@@ -330,6 +348,42 @@ impl Source {
     ) -> Result<Option<TransactionReceipt>> {
         let _permit = self.permit_request().await;
         Self::map_err(self.provider.get_transaction_receipt(tx_hash).await)
+    }
+
+    /// Fetches the OP Stack L1-fee fields for each transaction, in order.
+    ///
+    /// alloy's typed `TransactionReceipt` drops these OP-specific fields, so
+    /// each receipt is re-requested raw and deserialized for just the L1-fee
+    /// data. Yields all-`None` fields on non-OP chains.
+    pub async fn get_op_receipt_fields(
+        &self,
+        transactions: &[Transaction],
+    ) -> Result<Vec<OpReceiptFields>> {
+        let mut tasks = Vec::new();
+        for tx in transactions {
+            let tx_hash = *tx.inner.tx_hash();
+            let source = self.clone();
+            let task: task::JoinHandle<std::result::Result<OpReceiptFields, CollectError>> =
+                task::spawn(async move {
+                    let _permit = source.permit_request().await;
+                    let fields: Option<OpReceiptFields> = Source::map_err(
+                        source
+                            .provider
+                            .raw_request("eth_getTransactionReceipt".into(), (tx_hash,))
+                            .await,
+                    )?;
+                    Ok(fields.unwrap_or_default())
+                });
+            tasks.push(task);
+        }
+        let mut op_fields = Vec::new();
+        for task in tasks {
+            match task.await {
+                Ok(fields) => op_fields.push(fields?),
+                Err(e) => return Err(CollectError::TaskFailed(e)),
+            }
+        }
+        Ok(op_fields)
     }
 
     /// Gets the block at `block_num` (transaction hashes only)
