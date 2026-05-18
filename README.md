@@ -8,15 +8,25 @@
 >
 > Project direction lives in [`ROADMAP.md`](./ROADMAP.md), [`CHANGELOG.md`](./CHANGELOG.md), and the Architecture Decision Records in [`docs/adr/`](./docs/adr/). To contribute, start with [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
+## About this fork
+
+**cryo-ocd** is a fork of cryo with a few high-level goals:
+
+- Update lingering packages and dependencies, and fix outstanding bugs.
+- Review the features, issues, and PRs that have accumulated since ~v0.2.0 —
+  implementing or dropping each on its merits.
+- Extend functionality for speed, fuller data extraction, and focused on-chain
+  metrics.
+- And, personally, to learn the Git/GitHub workflow — chores, issues, CI/CD,
+  and the rest.
+
 `cryo` is the easiest way to extract blockchain data to parquet, csv, json, or a python dataframe.
 
 `cryo` is also extremely flexible, with [many different options](#cryo-help) to control how data is extracted + filtered + formatted
 
-*`cryo` is an early WIP, please report bugs + feedback to the issue tracker*
+*Please report bugs and feedback to the [issue tracker](https://github.com/trial123Zel/cryo-ocd/issues).*
 
 *note that `cryo`'s default settings will slam a node too hard for use with 3rd party RPC providers. Instead, `--requests-per-second` and `--max-concurrent-requests` should be used to impose ratelimits. Such settings will be handled automatically in a future release*.
-
-to discuss cryo, check out [the telegram group](https://t.me/paradigm_data)
 
 ## Contents
 
