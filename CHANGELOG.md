@@ -13,6 +13,27 @@ originates from an upstream contribution.
 
 ## [Unreleased]
 
+### Changed
+
+- The `upload-artifact` / `download-artifact` GitHub Actions are bumped
+  to their Node 24 builds (v7 / v8); the previous v4 pins ran on the
+  Node 20 runtime GitHub is retiring (forced to Node 24 on 2026-06-02,
+  removed 2026-09-16). (#93)
+- The Python build matrix and `requires-python` now start at **3.10** —
+  Python 3.8 and 3.9 have both reached end-of-life. `python-release`
+  builds wheels for 3.10–3.12. (#94)
+- The `cryo` Docker image now runs as `root` rather than a non-root
+  user. For a user-run CLI tool this removes the bind-mount permission
+  friction — the host output directory no longer needs to be made
+  writable for a fixed container uid. (#96)
+
+### Fixed
+
+- The Docker image's `cryo --version` reported the `Cargo.toml` version
+  (`0.4.0`) instead of the real build version, because the build
+  context excludes `.git`. The release workflow now passes the version
+  (`git describe`) into the image build. (#95)
+
 ## [0.4.0] - 2026-05-17
 
 ### Added

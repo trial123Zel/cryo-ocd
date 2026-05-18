@@ -13,6 +13,12 @@
 # image does not provide.
 FROM rust:1.95.0-slim-bookworm AS builder
 
+# The release workflow passes the version (from `git describe`) as a build
+# arg; the build context excludes .git, so without it cryo's build script
+# falls back to the Cargo.toml version. See crates/freeze/build.rs.
+ARG CRYO_VERSION
+ENV CRYO_VERSION=${CRYO_VERSION}
+
 # The rustls crypto backends (aws-lc-sys, ring) build C/assembly sources and
 # need CMake and Perl in addition to the C compiler the rust image ships.
 RUN apt-get update \
@@ -34,12 +40,11 @@ FROM debian:bookworm-slim AS runtime
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
-    && useradd --create-home --uid 10001 cryo \
-    && mkdir /data \
-    && chown cryo:cryo /data
+    && mkdir /data
 
 COPY --from=builder /build/target/release/cryo /usr/local/bin/cryo
 
-USER cryo
+# Runs as root: cryo is a user-run CLI tool, and root keeps bind-mounted
+# output directories writable without host-side permission setup (#96).
 WORKDIR /data
 ENTRYPOINT ["cryo"]
