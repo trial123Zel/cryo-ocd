@@ -166,7 +166,7 @@ re-verify before doing separate work.
 
 ## Phase 4 — Features & Enhancements
 
-In-scope enhancements from the community backlog. The three epics (★) get their
+In-scope enhancements from the community backlog. The four epics (★) get their
 own ADR and sub-issue breakdown when their milestone opens.
 
 | Task | Feature | Upstream / credit | Status |
@@ -176,7 +176,7 @@ own ADR and sub-issue breakdown when their milestone opens.
 | P4-3 | Raw transaction column | PR #180 (@0xMelkor) | ✅ Done |
 | P4-4 | `--to/--from-address` filtering for more datasets | issue #97 | ✅ Done |
 | P4-5 | `transaction_count` column on blocks | upstream PR #223 | ✅ Done |
-| P4-6 | OP Stack receipt fields | issue #155 | |
+| P4-6 ★ | OP Stack chain support (epic) | issue #155, ADR-0006 | |
 | P4-7 | WebSocket support | issue #65 | |
 | P4-8 ★ | `--function-signature` filtering + calldata decoding for `txs` | issue #140, PRs #145 (@cool-mestorf), #149 (@DoTheBestToGetTheBest) | |
 | P4-9 | Event decoding: u256 handling, empty-result datatypes, schema-summary display | issues #56, #184 | ✅ Done |
@@ -197,6 +197,12 @@ pursued as an epic. See [#79](https://github.com/trial123Zel/cryo-ocd/issues/79)
 
 `P4-18` (Python-CLI progress bar) was split out of `P4-16` during the docs
 review; `P4-16`'s notebook-example sub-task was dropped as out of scope.
+
+`P4-6` was re-scoped from "OP Stack receipt fields" to an epic during
+verification: cryo cannot deserialise OP Stack blocks at all — the per-block
+deposit transaction (type `0x7e`) is absent from alloy's Ethereum types. Full
+OP Stack support needs `op-alloy` integration; see
+[ADR-0006](./docs/adr/0006-op-stack-support.md). Sidelined for now.
 
 ---
 
