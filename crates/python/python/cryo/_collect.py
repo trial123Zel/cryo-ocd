@@ -55,7 +55,10 @@ async def async_collect(
     output_format: _spec.PythonOutput = 'polars',
     **kwargs: Unpack[_spec.CryoCliArgs],
 ) -> pl.DataFrame | pd.DataFrame | ListOfDicts | DictOfLists:
-    """asynchronously collect data and return as dataframe"""
+    """Asynchronously collect a dataset and return it in memory.
+
+    Awaitable equivalent of :func:`collect`; see it for the parameters.
+    """
 
     from . import _args
     from . import _cryo_rust  # type: ignore
@@ -123,7 +126,23 @@ def collect(
     output_format: _spec.PythonOutput = 'polars',
     **kwargs: Unpack[_spec.CryoCliArgs],
 ) -> pl.DataFrame | pd.DataFrame | ListOfDicts | DictOfLists:
-    """collect data and return as dataframe"""
+    """Collect a dataset and return it in memory.
+
+    ``datatype`` is the dataset to collect, such as ``"blocks"``,
+    ``"transactions"``, or ``"logs"``. ``output_format`` selects the return
+    type: ``"polars"`` (default; a ``polars.DataFrame``), ``"pandas"`` (a
+    ``pandas.DataFrame``, which needs the ``pandas`` extra), ``"list"`` (a
+    list of per-row dicts), or ``"dict"`` (a dict of column name to value
+    list).
+
+    The remaining keyword arguments mirror the ``cryo`` CLI flags, for
+    example ``blocks``, ``rpc``, ``contract``, and ``include_columns``, plus
+    the convenience pair ``start_block`` / ``end_block``. See
+    ``cryo._spec.CryoCliArgs`` for the full set.
+
+    Use :func:`freeze` to write the data to files instead, or
+    :func:`async_collect` from within an async context.
+    """
 
     import asyncio
 

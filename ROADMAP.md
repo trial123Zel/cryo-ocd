@@ -186,13 +186,17 @@ own ADR and sub-issue breakdown when their milestone opens.
 | P4-13 ★ | Cloud/S3 sink via a generalized `Sink` trait | issue #47, PR #92 (@sslivkoff) | |
 | P4-14 ★ | Direct Reth DB access, bypassing JSON-RPC | issues #3, #156, upstream PR #163 | |
 | P4-15 | Release binaries via CI + Dockerfile | issue #229, PR #40 (@distributedstatemachine) | ✅ Done |
-| P4-16 | Python docs, docstrings, notebook example, progress bar | issues #205, #178, PRs #186 (@peyha), #169 (@0xstubbs) | |
+| P4-16 | Python docs, API docstrings, install-instruction fixes | issues #205, #178, PRs #186 (@peyha), #169 (@0xstubbs) | |
 | P4-17 | Array & tuple support in log/event decoding (candidate epic) | issue #79, upstream #184 | |
+| P4-18 | Progress bar for the Python CLI | issue #178 | |
 
 `P4-17` was broken out of `P4-9` during scope review: array/tuple decoding is
 design-heavy — nested type representation and the interaction with cryo's u256
 multi-representation — and may warrant its own ADR and sub-issue breakdown if
 pursued as an epic. See [#79](https://github.com/trial123Zel/cryo-ocd/issues/79).
+
+`P4-18` (Python-CLI progress bar) was split out of `P4-16` during the docs
+review; `P4-16`'s notebook-example sub-task was dropped as out of scope.
 
 ---
 

@@ -4,7 +4,7 @@
 # runtime carries just the binary and the TLS trust store.
 #
 #   docker build -t cryo .
-#   docker run --rm -v "$PWD:/data" -e ETH_RPC_URL cryo blocks 18M:18.001M
+#   docker run --rm -v "$PWD:/data" -e ETH_RPC_URL cryo blocks -b 18000000:18000010
 
 # --- builder -----------------------------------------------------------------
 # Pinned to the bookworm suite so the builder's glibc matches the

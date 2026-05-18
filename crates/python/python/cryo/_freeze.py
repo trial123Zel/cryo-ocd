@@ -12,9 +12,9 @@ async def async_freeze(
     datatype: str | typing.Sequence[str],
     **kwargs: Unpack[_spec.CryoCliArgs],
 ) -> None:
-    """asynchronously collect data and save to files
+    """Asynchronously collect a dataset and write it to files on disk.
 
-    see cryo.parse_kwargs() for descriptions of arguments
+    Awaitable equivalent of :func:`freeze`; see it for the parameters.
     """
 
     from . import _cryo_rust  # type: ignore
@@ -35,7 +35,18 @@ def freeze(
     datatype: str | typing.Sequence[str],
     **kwargs: Unpack[_spec.CryoCliArgs],
 ) -> None:
-    """collect data and save to files"""
+    """Collect a dataset and write it to files on disk.
+
+    ``datatype`` is a dataset name, or a sequence of names, to collect, such
+    as ``"blocks"`` or ``["blocks", "transactions"]``. The keyword arguments
+    mirror the ``cryo`` CLI flags, for example ``blocks``, ``rpc``,
+    ``output_dir``, and ``file_format``, plus the convenience pair
+    ``start_block`` / ``end_block``. See ``cryo._spec.CryoCliArgs`` for the
+    full set.
+
+    Returns ``None``; the data is written as files. Use :func:`collect` to
+    return it in memory instead.
+    """
 
     import asyncio
 
