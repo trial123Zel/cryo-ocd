@@ -13,5 +13,6 @@ supersedes the old one, and update the old one's **Status**.
 | [0003](./0003-retire-clap-cryo.md) | Retire the clap_cryo fork | Accepted |
 | [0004](./0004-validation-strategy.md) | Validation strategy: cryo_test + self-hosted runner | Accepted |
 | [0005](./0005-secret-handling.md) | Secret handling & .env convention | Accepted |
+| [0006](./0006-op-stack-support.md) | OP Stack chain support | Proposed |
 
 New ADRs use [`template.md`](./template.md).
