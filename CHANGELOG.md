@@ -13,6 +13,8 @@ originates from an upstream contribution.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-17
+
 ### Added
 
 - Project governance and contributor documentation: `NOTICE`,
@@ -164,4 +166,5 @@ originates from an upstream contribution.
   `erc721_transfers`) now honour the address filters. Reported by
   @sslivkoff in paradigmxyz/cryo#97. (#78)
 
-[Unreleased]: https://github.com/trial123Zel/cryo-ocd/commits/main
+[Unreleased]: https://github.com/trial123Zel/cryo-ocd/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/trial123Zel/cryo-ocd/releases/tag/v0.4.0
