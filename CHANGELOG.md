@@ -29,6 +29,10 @@ originates from an upstream contribution.
 
 ### Fixed
 
+- The install instructions in `README.md` and the book pointed at
+  upstream `paradigmxyz/cryo` and at unpublished packages
+  (`cargo install cryo_cli`, `pip install cryo`); rewritten for this
+  fork — prebuilt binaries, build-from-source, and Docker. (#58)
 - The Docker image's `cryo --version` reported the `Cargo.toml` version
   (`0.4.0`) instead of the real build version, because the build
   context excludes `.git`. The release workflow now passes the version
