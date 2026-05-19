@@ -13,6 +13,8 @@ originates from an upstream contribution.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-19
+
 ### Added
 
 - WebSocket (`ws://` / `wss://`) and IPC endpoints are now supported and
