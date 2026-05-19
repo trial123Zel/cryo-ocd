@@ -147,6 +147,9 @@ pub fn _freeze<'py>(
             exclude_failed,
             rpc,
             network_name,
+            // JWT auth is a CLI-only feature (issue #107); the Python bindings
+            // do not expose it.
+            jwt_secret: None,
             requests_per_second,
             max_concurrent_requests,
             max_concurrent_chunks,

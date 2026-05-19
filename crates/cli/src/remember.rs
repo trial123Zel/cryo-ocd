@@ -4,7 +4,7 @@
 // - remembered commands are only activated when datatypes are omitted
 // - can add `--dry` or any other additional arguments to override remembered arguments
 
-use crate::args::Args;
+use crate::args::{redacted_cli_command, Args};
 use cryo_freeze::ParseError;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -24,8 +24,11 @@ pub(crate) struct RememberedCommand {
 
 pub(crate) fn save_remembered_command(cryo_dir: PathBuf, args: &Args) -> Result<(), ParseError> {
     let cryo_version = cryo_freeze::CRYO_VERSION.to_string();
+    // `args` serializes with `jwt_secret` as `#[serde(skip)]`; `command` is
+    // redacted so a `--jwt-secret` value on the command line is not persisted.
     let args = Args { remember: false, ..args.clone() };
-    let command = std::env::args().filter(|w| w != "--remember").collect::<Vec<_>>();
+    let command =
+        redacted_cli_command().into_iter().filter(|w| w != "--remember").collect::<Vec<_>>();
 
     let remembered = RememberedCommand { cryo_version, command, args };
 

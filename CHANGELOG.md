@@ -13,6 +13,18 @@ originates from an upstream contribution.
 
 ## [Unreleased]
 
+### Added
+
+- JWT authentication for RPC connections via a `--jwt-secret` flag, which
+  takes a 64-character hex string or a path to a file containing one. cryo
+  mints a short-lived, HS256-signed token and sends it as an
+  `Authorization: Bearer` header — auto-refreshed per request on `http://` /
+  `https://` endpoints, and set on the handshake for `ws://` / `wss://`
+  endpoints. The secret is ignored for IPC (access there is governed by
+  filesystem permissions). It can also be supplied via the `CRYO_JWT_SECRET`
+  environment variable, and is never written to logs, the run report, or the
+  remembered-command file. (#107)
+
 ## [0.5.0] - 2026-05-19
 
 ### Added

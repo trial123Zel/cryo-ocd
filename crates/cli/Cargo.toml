@@ -19,6 +19,8 @@ path = "src/main.rs"
 
 [dependencies]
 alloy = { workspace = true }
+alloy-rpc-types-engine = { workspace = true }
+alloy-transport-http = { workspace = true }
 anstyle = { workspace = true }
 clap = { workspace = true }
 color-print = { workspace = true }
@@ -33,3 +35,4 @@ rand = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
+url = "2.5.2"

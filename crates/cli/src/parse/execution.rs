@@ -1,4 +1,4 @@
-use crate::args::Args;
+use crate::args::{redacted_cli_command, Args};
 use cryo_freeze::{ExecutionEnv, ExecutionEnvBuilder, ParseError};
 
 pub(crate) fn parse_execution_env(args: &Args, n_tasks: u64) -> Result<ExecutionEnv, ParseError> {
@@ -18,6 +18,7 @@ pub(crate) fn parse_execution_env(args: &Args, n_tasks: u64) -> Result<Execution
         .report(!args.no_report)
         .report_dir(args.report_dir.clone())
         .consolidate(args.consolidate)
+        .cli_command(redacted_cli_command())
         .args(args_str);
 
     let builder = if !args.no_verbose {
