@@ -7,22 +7,26 @@ use alloy::{
         ext::{DebugApi, TraceApi},
         DynProvider, Provider, ProviderBuilder,
     },
-    rpc::types::{
-        trace::{
-            common::TraceResult,
-            geth::{
-                AccountState, CallConfig, CallFrame, DefaultFrame, DiffMode,
-                GethDebugBuiltInTracerType, GethDebugTracerType, GethDebugTracingOptions,
-                GethTrace, PreStateConfig, PreStateFrame,
+    rpc::{
+        client::ClientBuilder,
+        types::{
+            trace::{
+                common::TraceResult,
+                geth::{
+                    AccountState, CallConfig, CallFrame, DefaultFrame, DiffMode,
+                    GethDebugBuiltInTracerType, GethDebugTracerType, GethDebugTracingOptions,
+                    GethTrace, PreStateConfig, PreStateFrame,
+                },
+                parity::{
+                    LocalizedTransactionTrace, TraceResults, TraceResultsWithTransactionHash,
+                    TraceType,
+                },
             },
-            parity::{
-                LocalizedTransactionTrace, TraceResults, TraceResultsWithTransactionHash, TraceType,
-            },
+            Block, BlockTransactions, BlockTransactionsKind, Filter, Log, Transaction,
+            TransactionInput, TransactionReceipt, TransactionRequest,
         },
-        Block, BlockTransactions, BlockTransactionsKind, Filter, Log, Transaction,
-        TransactionInput, TransactionReceipt, TransactionRequest,
     },
-    transports::{http::reqwest::Url, RpcError, TransportErrorKind},
+    transports::{RpcError, TransportErrorKind},
 };
 use governor::{
     clock::DefaultClock,
@@ -118,8 +122,12 @@ impl Source {
     /// initialize source
     pub async fn init(rpc_url: Option<String>) -> Result<Source> {
         let rpc_url: String = parse_rpc_url(rpc_url);
-        let parsed_rpc_url: Url = rpc_url.parse().expect("rpc url is not valid");
-        let provider = ProviderBuilder::new().connect_http(parsed_rpc_url).erased();
+        // ClientBuilder::connect picks HTTP / WebSocket / IPC from the url scheme
+        let client = ClientBuilder::default()
+            .connect(&rpc_url)
+            .await
+            .map_err(|e| CollectError::RPCError(format!("could not connect to {rpc_url}: {e}")))?;
+        let provider = ProviderBuilder::new().connect_client(client).erased();
         let chain_id = provider
             .get_chain_id()
             .await
@@ -164,7 +172,7 @@ fn parse_rpc_url(rpc_url: Option<String>) -> String {
             }
         },
     };
-    if !url.starts_with("http") {
+    if !url.starts_with("http") && !url.starts_with("ws") && !url.ends_with(".ipc") {
         url = "http://".to_string() + url.as_str();
     };
     url

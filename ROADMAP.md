@@ -40,7 +40,7 @@ green; the `cryo_test` data diff runs as an advisory check.
 | 1 — Dependency Modernization | alloy 2.x, polars, pyo3, syn 2; retire clap_cryo | ✅ Done | 11 / 11 |
 | 2 — Quick Bug Fixes | Small, well-understood fixes with reference patches | ✅ Done | 9 / 9 |
 | 3 — Correctness Bugs | Data-correctness bugs needing node reproduction | ✅ Done | 6 / 6 |
-| 4 — Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress | 8 / 18 |
+| 4 — Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress | 9 / 19 |
 | Housekeeping | Low-risk maintenance, batched across phases | ✅ Done | 6 / 6 |
 | Deferred | Items blocked on infrastructure, awaiting a future phase | ⏸️ Deferred | 0 / 2 |
 
@@ -49,7 +49,7 @@ closed, and Phase 3's correctness fixes are all merged. Phase 4 is in progress:
 **`v0.4.0` — cryo-ocd's first release — has shipped**, with prebuilt binaries
 and a Docker image published by the `release` workflow. Two tasks — `P3-2` and
 `P4-12` — are **deferred**: both need an Erigon archive node to verify, and are
-parked for a future phase (see [Deferred](#deferred)). 50 of 62 tracked tasks
+parked for a future phase (see [Deferred](#deferred)). 51 of 63 tracked tasks
 are complete overall.
 
 ---
@@ -152,7 +152,7 @@ and sub-issue breakdown when their milestone opens.
 | P4-4 | ✅ Done | `--to`/`--from-address` filtering for more datasets | #46 | `cryo#97` |
 | P4-5 | ✅ Done | `transaction_count` column on the blocks dataset | #47 | `cryo#223` |
 | P4-6 ★ | ⬜ Not started | OP Stack chain support (epic) | #48 | `cryo#155`; [ADR-0006](./docs/adr/0006-op-stack-support.md) |
-| P4-7 | ⬜ Not started | WebSocket (`--ws`) support | #49 | `cryo#65` |
+| P4-7 | ✅ Done | WebSocket & IPC connection support | #49 | `cryo#65` |
 | P4-8 ★ | ⬜ Not started | `--function-signature` filtering + calldata decoding for `txs` | #50 | `cryo#140`, `cryo#145` (@cool-mestorf), `cryo#149` (@DoTheBestToGetTheBest) |
 | P4-9 | ✅ Done | Event decoding — u256 handling, empty-result datatypes, schema-summary display | #51 | `cryo#56`, `cryo#184` |
 | P4-10 | ⬜ Not started | Multiple RPC providers + graceful rate-limiting | #52 | `cryo#132`, `cryo#5` |
@@ -164,6 +164,7 @@ and sub-issue breakdown when their milestone opens.
 | P4-17 | ⬜ Not started | Array & tuple support in log/event decoding (candidate epic) | #79 | `cryo#184` |
 | P4-18 | ⬜ Not started | Progress bar for the Python CLI | #101 | `cryo#178` |
 | P4-19 | ⬜ Not started | mdBook (`book/`) fork-staleness review | #100 | — |
+| P4-20 | ⬜ Not started | JWT authentication for RPC connections | #107 | — |
 
 `P4-6` was re-scoped from "OP Stack receipt fields" to an epic during
 verification: cryo cannot deserialise OP Stack blocks at all — the per-block
@@ -182,6 +183,9 @@ notebook-example sub-task was dropped as out of scope.
 
 `P4-12` (`erigon_getHeaderByNumber` fast-path) has been **deferred** — it needs
 an Erigon node to test. See [Deferred](#deferred).
+
+`P4-20` was split out of the `P4-7` review: WebSocket/IPC transport and JWT
+authentication are separate concerns, so JWT was filed as its own task.
 
 ---
 

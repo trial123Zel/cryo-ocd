@@ -54,7 +54,9 @@ use as `cryo <dataset> [OPTIONS]`
 
 For a more complex example, see the [Uniswap Example](./examples/uniswap.sh).
 
-`cryo` uses `ETH_RPC_URL` env var as the data source unless `--rpc <url>` is given
+`cryo` uses the `ETH_RPC_URL` env var as the data source unless `--rpc <url>` is
+given. The connection transport is inferred from the URL scheme — `http(s)://`,
+`ws(s)://` for WebSocket, or a path ending in `.ipc` for a local IPC socket.
 
 ## Installation
 
