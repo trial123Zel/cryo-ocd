@@ -21,8 +21,10 @@ ENV CRYO_VERSION=${CRYO_VERSION}
 
 # The rustls crypto backends (aws-lc-sys, ring) build C/assembly sources and
 # need CMake and Perl in addition to the C compiler the rust image ships.
+# pkg-config + libssl-dev are for native-tls/openssl-sys, which alloy's
+# `jwt-auth` feature pulls in via the hyper transport (JWT auth, #107).
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends cmake perl \
+    && apt-get install -y --no-install-recommends cmake perl pkg-config libssl-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /build
@@ -36,9 +38,10 @@ RUN cargo build --release --locked --package cryo_cli
 FROM debian:bookworm-slim AS runtime
 
 # cryo reaches RPC endpoints over HTTPS; rustls validates against the system
-# trust store, so ca-certificates must be present.
+# trust store, so ca-certificates must be present. libssl3 is the runtime
+# shared library for the native-tls JWT transport (#107).
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates \
+    && apt-get install -y --no-install-recommends ca-certificates libssl3 \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir /data
 

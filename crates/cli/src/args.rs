@@ -94,6 +94,23 @@ pub struct Args {
     #[arg(long, help_heading = "Source Options")]
     pub network_name: Option<String>,
 
+    /// JWT secret for an authenticated RPC endpoint: a 64-char hex string, or
+    /// a path to a file containing one. Used for http(s):// and ws(s)://
+    /// endpoints; ignored for IPC
+    #[arg(
+        long,
+        env = "CRYO_JWT_SECRET",
+        hide_env_values = true,
+        value_name = "SECRET",
+        help_heading = "Source Options"
+    )]
+    // `#[serde(skip)]`: the JWT secret is sensitive and must never be
+    // persisted. Skipping it keeps it out of the run report and the
+    // `--remember` file; it is re-supplied each run via the flag or env var.
+    // `merge_with_precedence` carries it across its JSON round-trip explicitly.
+    #[serde(skip)]
+    pub jwt_secret: Option<String>,
+
     /// Ratelimit on requests per second
     #[arg(short('l'), long, value_name = "limit", help_heading = "Acquisition Options")]
     pub requests_per_second: Option<u32>,
@@ -274,6 +291,11 @@ impl Args {
     pub(crate) fn merge_with_precedence(self, other: Args) -> Self {
         let default_struct = Args::default();
 
+        // `jwt_secret` is `#[serde(skip)]`, so it is dropped by the JSON
+        // round-trip below. Carry it explicitly (this command's value wins)
+        // so a `--jwt-secret` on a replayed remembered command is not lost.
+        let jwt_secret = self.jwt_secret.clone().or_else(|| other.jwt_secret.clone());
+
         let mut s1_value: Value = serde_json::to_value(self).expect("Failed to serialize to JSON");
         let s2_value: Value = serde_json::to_value(other).expect("Failed to serialize to JSON");
         let default_value: Value =
@@ -290,8 +312,36 @@ impl Args {
             }
         }
 
-        serde_json::from_value(s1_value).expect("Failed to deserialize from JSON")
+        let mut merged: Args =
+            serde_json::from_value(s1_value).expect("Failed to deserialize from JSON");
+        merged.jwt_secret = jwt_secret;
+        merged
     }
+}
+
+/// The process arguments with the value of any `--jwt-secret` flag redacted.
+///
+/// The JWT secret is sensitive and must never be persisted; this keeps it out
+/// of the run report's `cli_command` and the `--remember` file's `command`.
+/// (The `CRYO_JWT_SECRET` env-var form is read from the environment and never
+/// appears on the command line.)
+pub(crate) fn redacted_cli_command() -> Vec<String> {
+    let mut redacted = Vec::new();
+    let mut redact_next = false;
+    for arg in std::env::args() {
+        if redact_next {
+            redacted.push("<redacted>".to_string());
+            redact_next = false;
+        } else if arg == "--jwt-secret" {
+            redacted.push(arg);
+            redact_next = true;
+        } else if arg.starts_with("--jwt-secret=") {
+            redacted.push("--jwt-secret=<redacted>".to_string());
+        } else {
+            redacted.push(arg);
+        }
+    }
+    redacted
 }
 
 pub(crate) fn get_styles() -> clap::builder::Styles {

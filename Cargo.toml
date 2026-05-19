@@ -27,6 +27,24 @@ alloy = { version = "2.0", features = [
     "provider-debug-api",
     "provider-trace-api",
     "transport-ipc-mock",
+    # `rpc-client-ws` exposes the typed `ClientBuilder::ws` builder, used by
+    # the JWT WebSocket path in crates/cli (P4-20).
+    "rpc-client-ws",
+] }
+# JWT auth for RPC connections (P4-20). The `alloy` meta-crate does not
+# re-export a `jwt-auth` feature, so the two underlying crates are pulled in
+# directly:
+#   - `alloy-transport-http`/`jwt-auth` gates the hyper `AuthLayer` used for
+#     HTTP JWT. `jwt-auth` enables alloy's `hyper` feature, which in turn
+#     pulls `hyper-tls` (native-tls/OpenSSL) -- so the JWT HTTP transport
+#     links native-tls and the Dockerfile installs libssl accordingly.
+#     `default-features = false` still keeps the main reqwest transport on
+#     rustls (it drops the `reqwest-default-tls` default).
+#   - `alloy-rpc-types-engine`/`jwt-aws-lc-rs` provides `JwtSecret` token
+#     signing on the aws-lc-rs backend already built for rustls.
+alloy-rpc-types-engine = { version = "2.0", features = ["jwt-aws-lc-rs"] }
+alloy-transport-http = { version = "2.0", default-features = false, features = [
+    "jwt-auth",
 ] }
 anstyle = "1.0.4"
 async-trait = "0.1.74"
@@ -34,6 +52,8 @@ chrono = { version = "0.4.31", features = ["serde"] }
 clap = { version = "4.5", features = [
     "derive",
     "color",
+    # `env` backs the `--jwt-secret` CRYO_JWT_SECRET fallback (P4-20).
+    "env",
 ] }
 colored = "2.0.4"
 color-print = "0.3.5"

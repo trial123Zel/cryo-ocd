@@ -40,7 +40,7 @@ green; the `cryo_test` data diff runs as an advisory check.
 | 1 — Dependency Modernization | alloy 2.x, polars, pyo3, syn 2; retire clap_cryo | ✅ Done | 11 / 11 |
 | 2 — Quick Bug Fixes | Small, well-understood fixes with reference patches | ✅ Done | 9 / 9 |
 | 3 — Correctness Bugs | Data-correctness bugs needing node reproduction | ✅ Done | 6 / 6 |
-| 4 — Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress | 11 / 19 |
+| 4 — Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress | 12 / 19 |
 | Housekeeping | Low-risk maintenance, batched across phases | ✅ Done | 6 / 6 |
 | Deferred | Items blocked on infrastructure, awaiting a future phase | ⏸️ Deferred | 0 / 2 |
 
@@ -51,7 +51,7 @@ with prebuilt CLI binaries (x86-64 Linux and Windows, ARM64 macOS) published by
 the `release` workflow. That workflow also builds and smoke-tests the Docker
 image, but does not publish it to a registry. Two tasks — `P3-2` and `P4-12` —
 are **deferred**: both need an Erigon archive node to verify, and are parked for
-a future phase (see [Deferred](#deferred)). 53 of 63 tracked tasks are complete
+a future phase (see [Deferred](#deferred)). 54 of 63 tracked tasks are complete
 overall.
 
 ---
@@ -166,7 +166,7 @@ and sub-issue breakdown when their milestone opens.
 | P4-17 | ⬜ Not started | Array & tuple support in log/event decoding (candidate epic) | #79 | `cryo#184` |
 | P4-18 | ✅ Done | Progress bar for the Python CLI | #101 | `cryo#178` |
 | P4-19 | ⬜ Not started | mdBook (`book/`) fork-staleness review | #100 | — |
-| P4-20 | ⬜ Not started | JWT authentication for RPC connections | #107 | — |
+| P4-20 | ✅ Done | JWT authentication for RPC connections | #107 | `cryo#65` |
 
 `P4-6` was re-scoped from "OP Stack receipt fields" to an epic during
 verification: cryo cannot deserialise OP Stack blocks at all — the per-block
