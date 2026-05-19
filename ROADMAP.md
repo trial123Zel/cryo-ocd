@@ -155,7 +155,7 @@ and sub-issue breakdown when their milestone opens.
 | P4-7 | ✅ Done | WebSocket & IPC connection support | #49 | `cryo#65` |
 | P4-8 ★ | ⬜ Not started | `--function-signature` filtering + calldata decoding for `txs` | #50 | `cryo#140`, `cryo#145` (@cool-mestorf), `cryo#149` (@DoTheBestToGetTheBest) |
 | P4-9 | ✅ Done | Event decoding — u256 handling, empty-result datatypes, schema-summary display | #51 | `cryo#56`, `cryo#184` |
-| P4-10 | ⬜ Not started | Multiple RPC providers + graceful rate-limiting | #52 | `cryo#132`, `cryo#5` |
+| P4-10 ★ | ⬜ Not started | Multiple RPC providers + rate-limiting (epic) | #52 | `cryo#132`, `cryo#5`; [ADR-0007](./docs/adr/0007-multiple-rpc-providers.md) |
 | P4-11 | ⬜ Not started | Incremental dataset consolidation | #53 | `cryo#29` |
 | P4-13 ★ | ⬜ Not started | Cloud/S3 sink via a generalized `Sink` trait | #55 | `cryo#47`, `cryo#92` (@sslivkoff) |
 | P4-14 ★ | ⬜ Not started | Direct Reth DB access, bypassing JSON-RPC | #56 | `cryo#3`, `cryo#156`, `cryo#163` |
@@ -171,6 +171,13 @@ verification: cryo cannot deserialise OP Stack blocks at all — the per-block
 deposit transaction (type `0x7e`) is absent from alloy's Ethereum types. Full
 OP Stack support needs `op-alloy` integration; see
 [ADR-0006](./docs/adr/0006-op-stack-support.md). Sidelined for now.
+
+`P4-10` was likewise re-scoped to an epic: multi-provider routing and adaptive
+rate-limiting are large, and — unlike most tasks — their ideal behaviour is
+highly specific to each user's setup (one local node, several paid providers,
+or a single throttled free tier all want different things). The design is
+captured in [ADR-0007](./docs/adr/0007-multiple-rpc-providers.md); sidelined
+until there is user demand to anchor the trade-offs.
 
 `P4-17` was broken out of `P4-9` during scope review: array/tuple decoding is
 design-heavy — nested type representation and the interaction with cryo's u256
