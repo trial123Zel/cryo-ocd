@@ -40,7 +40,7 @@ green; the `cryo_test` data diff runs as an advisory check.
 | 1 — Dependency Modernization | alloy 2.x, polars, pyo3, syn 2; retire clap_cryo | ✅ Done | 11 / 11 |
 | 2 — Quick Bug Fixes | Small, well-understood fixes with reference patches | ✅ Done | 9 / 9 |
 | 3 — Correctness Bugs | Data-correctness bugs needing node reproduction | ✅ Done | 6 / 6 |
-| 4 — Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress | 9 / 19 |
+| 4 — Features & Enhancements | In-scope feature work from the community backlog | 🔄 In progress | 10 / 19 |
 | Housekeeping | Low-risk maintenance, batched across phases | ✅ Done | 6 / 6 |
 | Deferred | Items blocked on infrastructure, awaiting a future phase | ⏸️ Deferred | 0 / 2 |
 
@@ -49,7 +49,7 @@ closed, and Phase 3's correctness fixes are all merged. Phase 4 is in progress:
 **`v0.4.0` — cryo-ocd's first release — has shipped**, with prebuilt binaries
 and a Docker image published by the `release` workflow. Two tasks — `P3-2` and
 `P4-12` — are **deferred**: both need an Erigon archive node to verify, and are
-parked for a future phase (see [Deferred](#deferred)). 51 of 63 tracked tasks
+parked for a future phase (see [Deferred](#deferred)). 52 of 63 tracked tasks
 are complete overall.
 
 ---
@@ -156,7 +156,7 @@ and sub-issue breakdown when their milestone opens.
 | P4-8 ★ | ⬜ Not started | `--function-signature` filtering + calldata decoding for `txs` | #50 | `cryo#140`, `cryo#145` (@cool-mestorf), `cryo#149` (@DoTheBestToGetTheBest) |
 | P4-9 | ✅ Done | Event decoding — u256 handling, empty-result datatypes, schema-summary display | #51 | `cryo#56`, `cryo#184` |
 | P4-10 ★ | ⬜ Not started | Multiple RPC providers + rate-limiting (epic) | #52 | `cryo#132`, `cryo#5`; [ADR-0007](./docs/adr/0007-multiple-rpc-providers.md) |
-| P4-11 | ⬜ Not started | Incremental dataset consolidation | #53 | `cryo#29` |
+| P4-11 | ✅ Done | Incremental dataset consolidation | #53 | `cryo#29` (@banteg) |
 | P4-13 ★ | ⬜ Not started | Cloud/S3 sink via a generalized `Sink` trait | #55 | `cryo#47`, `cryo#92` (@sslivkoff) |
 | P4-14 ★ | ⬜ Not started | Direct Reth DB access, bypassing JSON-RPC | #56 | `cryo#3`, `cryo#156`, `cryo#163` |
 | P4-15 | ✅ Done | Release binaries via CI + Dockerfile | #57 | `cryo#229`, `cryo#40` (@distributedstatemachine) |

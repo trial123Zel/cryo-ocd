@@ -20,6 +20,12 @@ originates from an upstream contribution.
   scheme. The CLI already connected transport-agnostically; the
   `cryo_freeze` `Source::init` library constructor, previously
   HTTP-only, now does as well. (#49)
+- A `--consolidate` output option merges the many small per-chunk
+  files into fewer, larger, block-aligned files once a chunk boundary
+  is complete, cutting storage use and speeding up queries.
+  Incremental collection now also recognises consolidated files, so a
+  re-run does not re-collect ranges already merged into a larger file.
+  (#53)
 
 ### Changed
 

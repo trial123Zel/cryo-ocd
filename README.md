@@ -225,6 +225,7 @@ Output Options:
                                      can be `datatype`, `network`, or custom string
       --label <LABEL>                Label to add to each filename
       --overwrite                    Overwrite existing files instead of skipping
+      --consolidate                  Consolidate chunk files into larger aligned files
       --csv                          Save as csv instead of parquet
       --json                         Save as json instead of parquet
       --row-group-size <GROUP_SIZE>  Number of rows per row group in parquet file

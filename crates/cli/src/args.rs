@@ -167,6 +167,10 @@ pub struct Args {
     #[arg(long, help_heading = "Output Options")]
     pub overwrite: bool,
 
+    /// Consolidate chunk files into larger aligned files once boundaries form
+    #[arg(long, help_heading = "Output Options")]
+    pub consolidate: bool,
+
     /// Save as csv instead of parquet
     #[arg(long, help_heading = "Output Options")]
     pub csv: bool,
