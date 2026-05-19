@@ -13,6 +13,14 @@ originates from an upstream contribution.
 
 ## [Unreleased]
 
+### Added
+
+- WebSocket (`ws://` / `wss://`) and IPC endpoints are now supported and
+  documented — the connection transport is selected from the `--rpc` URL
+  scheme. The CLI already connected transport-agnostically; the
+  `cryo_freeze` `Source::init` library constructor, previously
+  HTTP-only, now does as well. (#49)
+
 ### Changed
 
 - The `upload-artifact` / `download-artifact` GitHub Actions are bumped
