@@ -51,6 +51,7 @@ pub async fn freeze(
         if env.verbose >= 1 {
             summaries::print_cryo_conclusion(&results, query, env)
         }
+        run_consolidation(query, sink, env)?;
         return Ok(Some(results))
     }
 
@@ -72,8 +73,27 @@ pub async fn freeze(
         reports::write_report(env, query, sink, Some(&results))?;
     };
 
+    // consolidate output files into larger aligned files
+    run_consolidation(query, sink, env)?;
+
     // return
     Ok(Some(results))
+}
+
+/// consolidate output files into larger aligned files when --consolidate is set
+fn run_consolidation(
+    query: &Query,
+    sink: &FileOutput,
+    env: &ExecutionEnv,
+) -> Result<(), CollectError> {
+    if !env.consolidate {
+        return Ok(())
+    }
+    let summary = crate::consolidate::consolidate_query(query, sink, env.verbose >= 1)?;
+    if env.verbose >= 1 && summary.n_files_written > 0 {
+        println!("consolidated {} files into {}", summary.n_files_merged, summary.n_files_written);
+    }
+    Ok(())
 }
 
 fn get_payloads(
@@ -90,10 +110,33 @@ fn get_payloads(
     let mut payloads = Vec::new();
     let mut skipping = Vec::new();
     let mut all_paths = HashSet::new();
+
+    // existing on-disk file ranges per datatype, so a re-run recognises chunks
+    // already merged into larger consolidated files (P4-11)
+    let mut existing: HashMap<Datatype, Vec<(u64, u64)>> = HashMap::new();
+    if !sink.overwrite {
+        for meta in query.datatypes.iter() {
+            for dt in meta.datatypes() {
+                if let std::collections::hash_map::Entry::Vacant(slot) = existing.entry(dt) {
+                    let ranges =
+                        crate::consolidate::existing_block_ranges(query, sink, slot.key())?;
+                    slot.insert(ranges);
+                }
+            }
+        }
+    }
+
     for datatype in query.datatypes.clone().into_iter() {
         for partition in query.partitions.clone().into_iter() {
             let paths = sink.get_paths(query, &partition, Some(vec![datatype.clone()]))?;
-            if !sink.overwrite && paths.values().all(|path| path.exists()) {
+            if !sink.overwrite &&
+                paths.iter().all(|(dt, path)| {
+                    path.exists() ||
+                        existing.get(dt).is_some_and(|r| {
+                            crate::consolidate::partition_covered(&partition, r)
+                        })
+                })
+            {
                 skipping.push(partition);
                 continue
             }

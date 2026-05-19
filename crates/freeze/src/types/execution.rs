@@ -25,6 +25,8 @@ pub struct ExecutionEnv {
     pub t_end: Option<SystemTime>,
     /// report directory
     pub report_dir: Option<PathBuf>,
+    /// consolidate chunk files into larger aligned files after collection
+    pub consolidate: bool,
 }
 
 impl ExecutionEnv {
@@ -67,6 +69,7 @@ pub struct ExecutionEnvBuilder {
     t_start: SystemTime,
     t_end: Option<SystemTime>,
     report_dir: Option<PathBuf>,
+    consolidate: bool,
 }
 
 impl Default for ExecutionEnvBuilder {
@@ -82,6 +85,7 @@ impl Default for ExecutionEnvBuilder {
             t_start: SystemTime::now(),
             t_end: None,
             report_dir: None,
+            consolidate: false,
         }
     }
 }
@@ -116,6 +120,12 @@ impl ExecutionEnvBuilder {
         self
     }
 
+    /// consolidate chunk files into larger aligned files after collection
+    pub fn consolidate(mut self, consolidate: bool) -> Self {
+        self.consolidate = consolidate;
+        self
+    }
+
     /// progress bar size
     pub fn bar(mut self, n: u64) -> Result<Self, CollectError> {
         self.bar = Some(new_bar(n)?);
@@ -147,6 +157,7 @@ impl ExecutionEnvBuilder {
             t_start: self.t_start,
             t_end: self.t_end,
             report_dir: self.report_dir,
+            consolidate: self.consolidate,
         }
     }
 }

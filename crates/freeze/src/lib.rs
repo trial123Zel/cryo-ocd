@@ -8,6 +8,7 @@
 ))]
 
 mod collect;
+mod consolidate;
 mod datasets;
 mod freeze;
 mod multi_datasets;
