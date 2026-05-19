@@ -44,13 +44,15 @@ green; the `cryo_test` data diff runs as an advisory check.
 | Housekeeping | Low-risk maintenance, batched across phases | ✅ Done | 6 / 6 |
 | Deferred | Items blocked on infrastructure, awaiting a future phase | ⏸️ Deferred | 0 / 2 |
 
-**Status snapshot (2026-05-18).** Phases 0–2 are complete with their milestones
+**Status snapshot (2026-05-19).** Phases 0–2 are complete with their milestones
 closed, and Phase 3's correctness fixes are all merged. Phase 4 is in progress:
-**`v0.4.0` — cryo-ocd's first release — has shipped**, with prebuilt binaries
-and a Docker image published by the `release` workflow. Two tasks — `P3-2` and
-`P4-12` — are **deferred**: both need an Erigon archive node to verify, and are
-parked for a future phase (see [Deferred](#deferred)). 53 of 63 tracked tasks
-are complete overall.
+**`v0.5.0` has shipped** — cryo-ocd's second release, after the `v0.4.0` debut —
+with prebuilt CLI binaries (x86-64 Linux and Windows, ARM64 macOS) published by
+the `release` workflow. That workflow also builds and smoke-tests the Docker
+image, but does not publish it to a registry. Two tasks — `P3-2` and `P4-12` —
+are **deferred**: both need an Erigon archive node to verify, and are parked for
+a future phase (see [Deferred](#deferred)). 53 of 63 tracked tasks are complete
+overall.
 
 ---
 
