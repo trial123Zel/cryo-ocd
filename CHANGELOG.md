@@ -26,6 +26,9 @@ originates from an upstream contribution.
   Incremental collection now also recognises consolidated files, so a
   re-run does not re-collect ranges already merged into a larger file.
   (#53)
+- `cryo.collect()` now shows a `tqdm` progress bar while collecting an
+  explicit block range — the range is split into sub-ranges and the bar
+  advances as each completes. Pass `verbose=False` to suppress it. (#101)
 
 ### Changed
 
