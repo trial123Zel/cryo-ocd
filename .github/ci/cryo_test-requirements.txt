@@ -1,0 +1,8 @@
+markdown-it-py==4.3.0
+mdurl==0.1.2
+polars==1.44.2
+polars-runtime-32==1.44.2
+pygments==2.21.0
+rich==15.0.0
+rich-argparse==1.8.0
+typing-extensions==4.16.0
