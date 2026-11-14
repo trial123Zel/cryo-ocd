@@ -15,8 +15,9 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: [self-hosted, small-ci]
+    # pi4-2 (arm64, 4 cores, CARGO_BUILD_JOBS=2): a cold build takes ~45 min.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       # dtolnay/rust-toolchain has no version tags; pinned to a master commit.
@@ -33,8 +34,9 @@ jobs:
         run: cargo test --workspace
 
   clippy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: [self-hosted, small-ci]
+    # pi4-2 (arm64, 4 cores, CARGO_BUILD_JOBS=2): a cold build takes ~45 min.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # master
@@ -49,7 +51,7 @@ jobs:
           RUSTFLAGS: -Dwarnings
 
   fmt:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, small-ci]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
