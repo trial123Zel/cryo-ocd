@@ -5,4 +5,6 @@ polars-runtime-32==1.44.2
 pygments==2.21.0
 rich==15.0.0
 rich-argparse==1.8.0
+toolstr==0.9.12
+tooltime==0.3.5
 typing-extensions==4.16.0
