@@ -79,18 +79,44 @@ jobs:
           cargo build --release -p cryo_cli --manifest-path base/Cargo.toml
           cp "$CARGO_TARGET_DIR/release/cryo" "$RUNNER_TEMP/cryo-main"
 
+      - name: Create the cryo_test environment
+        run: |
+          # Per-job venv inside RUNNER_TEMP (never ~ or host Python). Only
+          # cryo_test's own dependencies are needed — it drives the `cryo`
+          # binaries built above and never imports the cryo Python package.
+          # Versions are pinned in .github/ci/cryo_test-requirements.txt.
+          set -euo pipefail
+          # astral-sh/setup-uv is not on the repo's allowed-actions list, so
+          # use the uv already installed on the runner host (read-only use;
+          # all state goes to RUNNER_TEMP).
+          uv="$HOME/.local/bin/uv"
+          if [ ! -x "$uv" ]; then
+            echo "::error::uv not found at $uv on the runner"
+            exit 1
+          fi
+          export UV_CACHE_DIR="$RUNNER_TEMP/uv-cache"
+          "$uv" venv --python 3.12 "$RUNNER_TEMP/cryo_test_venv"
+          "$uv" pip install --python "$RUNNER_TEMP/cryo_test_venv/bin/python" \
+            -r pr/.github/ci/cryo_test-requirements.txt
+
       - name: cryo_test data diff (pull request vs main)
         run: |
+          set -o pipefail
           cd pr/crates/python/python/cryo_test
           # The cryo_test harness exits 0 regardless of the result, so the
           # outcome is read from its "Total differences" summary line.
-          "$HOME/cryo-ocd-baseline/venv/bin/python" -m cryo_test \
+          rc=0
+          "$RUNNER_TEMP/cryo_test_venv/bin/python" -m cryo_test \
             --executable \
               main="$RUNNER_TEMP/cryo-main" \
               pr="$RUNNER_TEMP/cryo-pr" \
             --rpc "$RETH_RPC_URL" \
             --dir "$RUNNER_TEMP/cryo_test_diff" \
-            2>&1 | tee "$RUNNER_TEMP/cryo_test.log"
+            2>&1 | tee "$RUNNER_TEMP/cryo_test.log" || rc=$?
+          if [ "$rc" -ne 0 ] || ! grep -qE "Total differences: [0-9]+" "$RUNNER_TEMP/cryo_test.log"; then
+            echo "::error::cryo_test did not complete (exit $rc)"
+            exit 1
+          fi
           if ! grep -qE "Total differences: 0([^0-9]|$)" "$RUNNER_TEMP/cryo_test.log"; then
             echo "::error::cryo_test found data differences between this pull request and main — review the diff above."
             exit 1
