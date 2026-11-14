@@ -31,7 +31,7 @@ jobs:
       github.actor == 'trial123Zel' &&
       (github.event_name == 'workflow_dispatch' ||
        github.event.pull_request.head.repo.full_name == github.repository)
-    runs-on: [self-hosted]
+    runs-on: [self-hosted, cryo-data]
     timeout-minutes: 90
     steps:
       - name: Check out the pull request
